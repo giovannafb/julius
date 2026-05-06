@@ -15,19 +15,35 @@
     "@fastify/cors": "^11.2.0",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.6",
+    "argon2": "^0.44.0",
     "dotenv": "^17.4.2",
     "fastify": "^5.8.5",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
     "prompt-sync": "^4.2.0"
   },
   "devDependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@types/argon2": "^0.14.1",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.6.0",
     "@types/pg": "^8.20.0",
     "@types/prompt-sync": "^4.2.3",
+    "install": "^0.13.0",
     "prisma": "^7.8.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giovannafb/julius.git"
+  },
+  "bugs": {
+    "url": "https://github.com/giovannafb/julius/issues"
+  },
+  "homepage": "https://github.com/giovannafb/julius#readme"
 }

@@ -7,13 +7,19 @@ import usuarioRoutes from './routes/usuario.route.js';
 import perfilEconomicoRoutes from './routes/perfilEconomico.route.js';
 import planoFinanceiroRoutes from './routes/planoFinanceiro.route.js';
 import objetivoFinanceiroRoutes from './routes/objetivoFinanceiro.route.js';
+import authRoutes from './routes/auth.route.js'
+import { authMiddleware } from './middlewares/auth.middleware.js';
+import historicoRoutes from './routes/historico.route.js';
+import relatorioMensalRoutes from './routes/relatorioMensal.route.js';
 //instância servidor web Fastify, ativando logs
+
 const app = Fastify({ logger: true });
 await app.register(cors, {
     origin: "*",
     methods: "*",
 });
 await app.register(fastifySwagger, {
+    mode: 'dynamic',
     openapi: {
         info: {
             title: 'Julius API',
@@ -21,7 +27,16 @@ await app.register(fastifySwagger, {
             version: '1.0.0',
         },
         servers: [{ url: 'http://localhost:3000' }],
-    },
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                }
+            },
+        }
+    }
 })
 await app.register(fastifySwaggerUi, {
     routePrefix: '/swag',
@@ -31,6 +46,29 @@ app.register(usuarioRoutes, { prefix: '/usuarios' });
 app.register(perfilEconomicoRoutes, { prefix: '/perfisEconomicos' });
 app.register(planoFinanceiroRoutes, { prefix: '/planosFinanceiros' });
 app.register(objetivoFinanceiroRoutes, { prefix: '/objetivosFinanceiros' });
+app.register(authRoutes, { prefix: '/auth' })
+app.register(historicoRoutes, { prefix: '/historicos' });
+app.register(relatorioMensalRoutes, { prefix: '/relatoriosMensais' });
+
+
+const PUBLIC_ROUTES = ['/auth/login', '/swag', '/swag/']
+app.addHook('onRequest', async (request, reply) => {
+    if (!request.url) {
+        reply.code(400).send({ error: 'Bad Request' })
+        return
+    }
+    const url = request.url!.split('?')[0] ?? request.url! // ignora query string
+    // Permite rotas públicas e tudo que começa com /docs (ex: /docs/static/...)
+    if (PUBLIC_ROUTES.includes(url) || url.startsWith('/swag')) {
+        return
+    }
+    // Sua lógica aqui (ex: validar JWT)
+    const token = request.headers.authorization
+    if (!token) {
+        reply.code(401).send({ error: 'Unauthorized' })
+        return
+    }
+})
 
 const start = async () => { // Função assíncrona chamada start
     try { // Inicia o servidor na porta 3000

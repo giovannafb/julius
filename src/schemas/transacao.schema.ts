@@ -25,6 +25,7 @@ const params = {
 export const getTransacaoSchema = {
   schema: {
     tags: ['Transacao'],
+    security: [{ bearerAuth: [] }],
     response: { 200: { type: 'array', items: transacaoSchema } },
   },
 };
@@ -32,6 +33,7 @@ export const getTransacaoSchema = {
 export const postTransacaoSchema = {
   schema: {
     tags: ['Transacao'],
+    security: [{ bearerAuth: [] }],
     body: transacaoBodySchema,
   },
 };
@@ -39,6 +41,7 @@ export const postTransacaoSchema = {
 export const getTransacaoByIdSchema = {
   schema: {
     tags: ['Transacao'],
+    security: [{ bearerAuth: [] }],
     params,
   },
 };
@@ -47,6 +50,7 @@ export const putTransacaoSchema = {
   schema: {
     tags: ['Transacao'],
     params,
+    security: [{ bearerAuth: [] }],
     body: transacaoBodySchema,
   },
 };
@@ -54,6 +58,7 @@ export const putTransacaoSchema = {
 export const deleteTransacaoSchema = {
   schema: {
     tags: ['Transacao'],
+    security: [{ bearerAuth: [] }],
     params,
   },
 };

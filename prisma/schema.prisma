@@ -49,6 +49,7 @@ model Usuario {
   planosFinanceiros PlanoFinanceiro[]
   perfilEconomico   PerfilEconomico?
 
+  token String
   @@map("Usuario")
 }
 

@@ -25,6 +25,7 @@ const params = {
 export const getObjetivoSchema = {
   schema: {
     tags: ['ObjetivoFinanceiro'],
+    security: [{ bearerAuth: [] }],
     response: { 200: { type: 'array', items: objetivoSchema } },
   },
 };
@@ -32,6 +33,7 @@ export const getObjetivoSchema = {
 export const postObjetivoSchema = {
   schema: {
     tags: ['ObjetivoFinanceiro'],
+    security: [{ bearerAuth: [] }],
     body: objetivoBodySchema,
   },
 };
@@ -39,6 +41,7 @@ export const postObjetivoSchema = {
 export const getObjetivoByIdSchema = {
   schema: {
     tags: ['ObjetivoFinanceiro'],
+    security: [{ bearerAuth: [] }],
     params,
   },
 };
@@ -46,6 +49,7 @@ export const getObjetivoByIdSchema = {
 export const putObjetivoSchema = {
   schema: {
     tags: ['ObjetivoFinanceiro'],
+    security: [{ bearerAuth: [] }],
     params,
     body: objetivoBodySchema,
   },
@@ -54,6 +58,7 @@ export const putObjetivoSchema = {
 export const deleteObjetivoSchema = {
   schema: {
     tags: ['ObjetivoFinanceiro'],
+    security: [{ bearerAuth: [] }],
     params,
   },
 };

@@ -20,8 +20,8 @@ const params = {
   properties: { id: { type: 'string' } }
 };
 
-export const getPerfilSchema = { schema: { tags: ['Perfis Economicos'], response: { 200: { type: 'array', items: perfilSchema } } } };
-export const postPerfilSchema = { schema: { tags: ['Perfis Economicos'], body: perfilBody } };
-export const getPerfilByIdSchema = { schema: { tags: ['Perfis Economicos'], params } };
-export const putPerfilSchema = { schema: { tags: ['Perfis Economicos'], params, body: perfilBody } };
-export const deletePerfilSchema = { schema: { tags: ['Perfis Economicos'], params } };
+export const getPerfilSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }],response: { 200: { type: 'array', items: perfilSchema } } } };
+export const postPerfilSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }], body: perfilBody } };
+export const getPerfilByIdSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }], params } };
+export const putPerfilSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }], params, body: perfilBody } };
+export const deletePerfilSchema = { schema: { tags: ['Perfis Economicos'], params, security: [{ bearerAuth: [] }], } };

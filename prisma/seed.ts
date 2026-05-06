@@ -1,6 +1,8 @@
 import { prisma } from '../lib/prisma'
+import argon2 from 'argon2'; //Adicionar import <---------
 
 async function main() {
+  const senhaHash = await argon2.hash('caju'); //Gerar hash
   // Limpar tabelas na ordem correta por causa das relações
   await prisma.notificacao.deleteMany();
   await prisma.analiseImpactoObjetivo.deleteMany();
@@ -23,6 +25,7 @@ async function main() {
       senha: "123456",
       email: "giovanna@email.com",
       telefone: "35999999999",
+      token: senhaHash
     },
   });
 

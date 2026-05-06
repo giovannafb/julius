@@ -25,6 +25,7 @@ const params = {
 export const getUsuarioSchema = {
   schema: {
     tags: ['Usuarios'],
+    security: [{ bearerAuth: [] }],
     response: { 200: { type: 'array', items: usuarioSchema } },
   },
 };
@@ -33,18 +34,19 @@ export const postUsuarioSchema = {
   schema: {
     tags: ['Usuarios'],
     body: usuarioBodySchema,
+    security: [{ bearerAuth: [] }],
     response: { 201: usuarioSchema },
   },
 };
 
 export const getUsuarioByIdSchema = {
-  schema: { tags: ['Usuarios'], params, response: { 200: usuarioSchema } },
+  schema: { tags: ['Usuarios'], params, response: { 200: usuarioSchema } , security: [{ bearerAuth: [] }],},
 };
 
 export const putUsuarioSchema = {
-  schema: { tags: ['Usuarios'], params, body: usuarioBodySchema },
+  schema: { tags: ['Usuarios'], params, security: [{ bearerAuth: [] }], body: usuarioBodySchema },
 };
 
 export const deleteUsuarioSchema = {
-  schema: { tags: ['Usuarios'], params },
+  schema: { tags: ['Usuarios'], params, security: [{ bearerAuth: [] }], },
 };

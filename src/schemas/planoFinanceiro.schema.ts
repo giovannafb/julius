@@ -26,17 +26,17 @@ export const getPlanoSchema = {
 };
 
 export const postPlanoSchema = {
-  schema: { tags: ['Plano Financeiro'], body: planoBodySchema },
+  schema: { tags: ['Plano Financeiro'], security: [{ bearerAuth: [] }], body: planoBodySchema },
 };
 
 export const getPlanoByIdSchema = {
-  schema: { tags: ['Plano Financeiro'], params },
+  schema: { tags: ['Plano Financeiro'], params, security: [{ bearerAuth: [] }], },
 };
 
 export const putPlanoSchema = {
-  schema: { tags: ['Plano Financeiro'], params, body: planoBodySchema },
+  schema: { tags: ['Plano Financeiro'], params, body: planoBodySchema , security: [{ bearerAuth: [] }],},
 };
 
 export const deletePlanoSchema = {
-  schema: { tags: ['Plano Financeiro'], params },
+  schema: { tags: ['Plano Financeiro'], params , security: [{ bearerAuth: [] }],},
 };
