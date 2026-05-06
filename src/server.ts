@@ -11,6 +11,12 @@ import authRoutes from './routes/auth.route.js'
 import { authMiddleware } from './middlewares/auth.middleware.js';
 import historicoRoutes from './routes/historico.route.js';
 import relatorioMensalRoutes from './routes/relatorioMensal.route.js';
+import analiseImpactoRoutes from './routes/analiseImpacto.route.js';
+import notificacaoRoutes from './routes/notificacao.route.js';
+import receitaRoutes from './routes/receita.route.js';
+import despesaRoutes from './routes/despesa.route.js';
+import analiseImpactoObjetivoRoutes from './routes/analiseImpactoObjetivo.route.js';
+
 //instância servidor web Fastify, ativando logs
 
 const app = Fastify({ logger: true });
@@ -49,6 +55,11 @@ app.register(objetivoFinanceiroRoutes, { prefix: '/objetivosFinanceiros' });
 app.register(authRoutes, { prefix: '/auth' })
 app.register(historicoRoutes, { prefix: '/historicos' });
 app.register(relatorioMensalRoutes, { prefix: '/relatoriosMensais' });
+app.register(analiseImpactoRoutes, { prefix: '/analisesImpacto' });
+app.register(notificacaoRoutes, { prefix: '/notificacoes' });
+app.register(receitaRoutes, { prefix: '/receitas' });
+app.register(despesaRoutes, { prefix: '/despesas' });
+app.register(analiseImpactoObjetivoRoutes, { prefix: '/analisesImpactoObjetivos' });
 
 
 const PUBLIC_ROUTES = ['/auth/login', '/swag', '/swag/']
