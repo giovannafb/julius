@@ -22,10 +22,9 @@ async function main() {
     data: {
       nome: "Giovanna Brito",
       login: "giovanna",
-      senha: "123456",
+      senha: senhaHash,
       email: "giovanna@email.com",
       telefone: "35999999999",
-      token: senhaHash
     },
   });
 

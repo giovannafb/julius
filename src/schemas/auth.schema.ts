@@ -11,11 +11,11 @@ const loginResponseSchema = {
         message: { type: 'string' },
         token: { type: 'string' },
     },
-} as const
+} as const;
 export const getAuthSchema = {
     schema: {
         tags: ['Auth'],
-        summary: 'Autentica um usuário e retorna um token JWT',
+        summary: 'Autentica um usuário e retorna um senha JWT',
         body: loginSchema,
         response: { 200: loginResponseSchema },
     },

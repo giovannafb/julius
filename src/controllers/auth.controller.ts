@@ -10,7 +10,7 @@ export const loginController = async (request: FastifyRequest<{
 }>, reply: FastifyReply): Promise<void> => {
     const { login, senha } = request.body;
     if (!login || !senha) {
-        reply.status(400).send({ message: 'login e senha são obrigatórios.' });
+        reply.status(400).send({ message: 'Login e senha são obrigatórios.' });
         return;
     }
     const usuario = await authRepository.findUsuarioByLogin(login);
@@ -18,9 +18,9 @@ export const loginController = async (request: FastifyRequest<{
         reply.status(401).send({ message: 'Usuário não encontrado.' });
         return;
     }
-    const senhaVallogina = await argon2.verify(usuario.senha, senha);
-    if (!senhaVallogina) {
-        reply.status(401).send({ message: 'Senha invállogina.' });
+    const senhaValida = await argon2.verify(usuario.senha, senha);
+    if (!senhaValida) {
+        reply.status(401).send({ message: 'Senha inválida.' });
         return;
     }
     const token = jwt.sign(

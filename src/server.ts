@@ -62,23 +62,23 @@ app.register(despesaRoutes, { prefix: '/despesas' });
 app.register(analiseImpactoObjetivoRoutes, { prefix: '/analisesImpactoObjetivos' });
 
 
-const PUBLIC_ROUTES = ['/auth/login', '/swag', '/swag/']
+const PUBLIC_ROUTES = ['/auth/login', '/auth', '/swag', '/swag/']
+
+
 app.addHook('onRequest', async (request, reply) => {
     if (!request.url) {
         reply.code(400).send({ error: 'Bad Request' })
         return
     }
-    const url = request.url!.split('?')[0] ?? request.url! // ignora query string
-    // Permite rotas públicas e tudo que começa com /docs (ex: /docs/static/...)
+
+    const url = request.url!.split('?')[0] ?? request.url!
+    
     if (PUBLIC_ROUTES.includes(url) || url.startsWith('/swag')) {
         return
     }
-    // Sua lógica aqui (ex: validar JWT)
-    const token = request.headers.authorization
-    if (!token) {
-        reply.code(401).send({ error: 'Unauthorized' })
-        return
-    }
+
+    // AGORA SIM: Você chama o middleware que contém o jwt.verify
+    await authMiddleware(request, reply); 
 })
 
 const start = async () => { // Função assíncrona chamada start

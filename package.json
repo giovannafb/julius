@@ -15,12 +15,15 @@
     "@fastify/cors": "^11.2.0",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.6",
+    "@hookform/resolvers": "^5.4.0",
     "argon2": "^0.44.0",
     "dotenv": "^17.4.2",
     "fastify": "^5.8.5",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
-    "prompt-sync": "^4.2.0"
+    "prompt-sync": "^4.2.0",
+    "react-hook-form": "^7.76.0",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@prisma/adapter-pg": "^7.8.0",

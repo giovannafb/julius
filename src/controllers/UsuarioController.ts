@@ -1,6 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { UsuarioRepository } from '../repositories/UsuarioRepository.js';
 import type { Usuario } from '../../generated/prisma/client.js';
+import argon2 from 'argon2'; // Adicione o import
 
 export class UsuarioController {
     private usuarioRepository = new UsuarioRepository();
@@ -9,6 +10,9 @@ export class UsuarioController {
         request: FastifyRequest<{ Body: Omit<Usuario, 'id'> }>,
         reply: FastifyReply
     ) => {
+        const dados = request.body;
+        const senhaHash = await argon2.hash(dados.senha);
+        request.body.senha = senhaHash;
         const json = await this.usuarioRepository.create(request.body);
         reply.status(201).send(json);
     };

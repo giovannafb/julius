@@ -3,3 +3,7 @@ node_modules
 .env
 volumes
 generated
+*.swp
+*.png
+*.svg
+*.zip
