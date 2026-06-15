@@ -17,13 +17,13 @@ interface IUsuario {
     telefone: string;
 }
 
-const schema = yup.object({
+const schema: yup.ObjectSchema<IUsuario> = yup.object({
     nome: yup.string().required("Nome é obrigatório"),
     login: yup.string().required("Login é obrigatório"),
     senha: yup.string().min(6, "Senha deve ter no mínimo 6 caracteres").required("Senha é obrigatória"),
     email: yup.string().email("Email inválido").required("Email é obrigatório"),
     telefone: yup.string().length(11, "Telefone deve ter 11 dígitos").required("Telefone é obrigatório")
-}).required()
+}).required();
 
 function Usuario() {
 
@@ -32,7 +32,7 @@ function Usuario() {
         handleSubmit,
         formState: { errors }
     } = useForm<IUsuario>({
-        resolver: yupResolver(schema)
+        resolver: yupResolver(schema) as any
     });
 
     const onSubmit = (data: IUsuario) => {

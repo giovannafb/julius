@@ -15,14 +15,49 @@ export class ReceitaRepository {
         });
     }
 
-    public async create(data: Receita): Promise<Receita> {
-        return prisma.receita.create({ data });
+    public async create(data: any): Promise<Receita> {
+        const payload: any = {
+            fonte: data.fonte,
+            transacao: {
+                create: {
+                    descricao: data.descricao,
+                    valor: data.valor,
+                    data: new Date(data.data),
+                    tipo: 'RECEITA',
+                    periodicidade: data.periodicidade
+                }
+            }
+        };
+        if (data.perfilEconomicoId) {
+            payload.perfilEconomico = { connect: { id: data.perfilEconomicoId } };
+        }
+        return prisma.receita.create({
+            data: payload,
+            include: { transacao: true }
+        });
     }
 
-    public async update(id: number, data: Partial<Receita>): Promise<Receita> {
+    public async update(id: number, data: any): Promise<Receita> {
+        const payload: any = {};
+        if (data.fonte !== undefined) payload.fonte = data.fonte;
+        if (data.perfilEconomicoId !== undefined) {
+            payload.perfilEconomico = { connect: { id: data.perfilEconomicoId } };
+        }
+
+        const transacaoUpdate: any = {};
+        if (data.descricao !== undefined) transacaoUpdate.descricao = data.descricao;
+        if (data.valor !== undefined) transacaoUpdate.valor = data.valor;
+        if (data.data !== undefined) transacaoUpdate.data = new Date(data.data);
+        if (data.periodicidade !== undefined) transacaoUpdate.periodicidade = data.periodicidade;
+        
+        if (Object.keys(transacaoUpdate).length > 0) {
+            payload.transacao = { update: transacaoUpdate };
+        }
+
         return prisma.receita.update({ 
             where: { transacaoId: id }, 
-            data 
+            data: payload,
+            include: { transacao: true }
         });
     }
 

@@ -7,7 +7,7 @@ export const relatorioMensalSchema = {
     totalDespesas: { type: 'number' },
     totalReceita: { type: 'number' },
     saldoFinal: { type: 'number' },
-    conclusaoObjetivos: { type: 'number' },
+    objetivosConcluidos: { type: 'number' },
     planoFinanceiroId: { type: 'integer' },
   },
 };
@@ -15,7 +15,15 @@ export const relatorioMensalSchema = {
 export const relatorioMensalBodySchema = {
   type: 'object',
   required: ['mes', 'dataEmissao', 'planoFinanceiroId'],
-  properties: relatorioMensalSchema.properties,
+  properties: {
+    mes: { type: 'string' },
+    dataEmissao: { type: 'string', format: 'date-time' },
+    totalDespesas: { type: 'number' },
+    totalReceita: { type: 'number' },
+    saldoFinal: { type: 'number' },
+    objetivosConcluidos: { type: 'number' },
+    planoFinanceiroId: { type: 'integer' },
+  },
 };
 
 const params = {

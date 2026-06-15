@@ -11,7 +11,11 @@ export const perfilSchema = {
 export const perfilBody = {
   type: 'object',
   required: ['saldo', 'status', 'usuarioId'],
-  properties: perfilSchema.properties
+  properties: {
+    saldo: { type: 'number' },
+    status: { type: 'boolean' },
+    usuarioId: { type: 'integer' }
+  }
 };
 
 const params = {
@@ -20,7 +24,7 @@ const params = {
   properties: { id: { type: 'string' } }
 };
 
-export const getPerfilSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }],response: { 200: { type: 'array', items: perfilSchema } } } };
+export const getPerfilSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }], response: { 200: { type: 'array', items: perfilSchema } } } };
 export const postPerfilSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }], body: perfilBody } };
 export const getPerfilByIdSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }], params } };
 export const putPerfilSchema = { schema: { tags: ['Perfis Economicos'], security: [{ bearerAuth: [] }], params, body: perfilBody } };

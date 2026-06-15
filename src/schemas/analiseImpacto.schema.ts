@@ -5,14 +5,21 @@ export const analiseImpactoSchema = {
     dataAnalise: { type: 'string', format: 'date-time' },
     comprometeObjetivos: { type: 'boolean' },
     planoFinanceiroId: { type: 'integer' },
-    transacaoId: { type: 'integer' },
+    transacaoId: { type: 'integer', nullable: true },
+    objetivoOrigemId: { type: 'integer', nullable: true },
   },
 };
 
 export const analiseImpactoBodySchema = {
   type: 'object',
-  required: ['dataAnalise', 'planoFinanceiroId', 'transacaoId'],
-  properties: analiseImpactoSchema.properties,
+  required: ['dataAnalise', 'planoFinanceiroId'],
+  properties: {
+    dataAnalise: { type: 'string', format: 'date-time' },
+    comprometeObjetivos: { type: 'boolean' },
+    planoFinanceiroId: { type: 'integer' },
+    transacaoId: { type: 'integer', nullable: true },
+    objetivoOrigemId: { type: 'integer', nullable: true },
+  },
 };
 
 const params = {

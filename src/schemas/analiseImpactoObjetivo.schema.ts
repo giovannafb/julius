@@ -9,7 +9,10 @@ export const analiseImpactoObjetivoSchema = {
 export const analiseImpactoObjetivoBodySchema = {
   type: 'object',
   required: ['analiseImpactoId', 'objetivoFinanceiroId'],
-  properties: analiseImpactoObjetivoSchema.properties,
+  properties: {
+    analiseImpactoId: { type: 'integer' },
+    objetivoFinanceiroId: { type: 'integer' },
+  },
 };
 
 const compositeParams = {

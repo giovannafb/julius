@@ -15,14 +15,47 @@ export class DespesaRepository {
         });
     }
 
-    public async create(data: Despesa): Promise<Despesa> {
-        return prisma.despesa.create({ data });
+    public async create(data: any): Promise<Despesa> {
+        const payload: any = {
+            transacao: {
+                create: {
+                    descricao: data.descricao,
+                    valor: data.valor,
+                    data: new Date(data.data),
+                    tipo: 'DESPESA',
+                    periodicidade: data.periodicidade
+                }
+            }
+        };
+        if (data.perfilEconomicoId) {
+            payload.perfilEconomico = { connect: { id: data.perfilEconomicoId } };
+        }
+        return prisma.despesa.create({
+            data: payload,
+            include: { transacao: true }
+        });
     }
 
-    public async update(id: number, data: Partial<Despesa>): Promise<Despesa> {
+    public async update(id: number, data: any): Promise<Despesa> {
+        const payload: any = {};
+        if (data.perfilEconomicoId !== undefined) {
+            payload.perfilEconomico = { connect: { id: data.perfilEconomicoId } };
+        }
+
+        const transacaoUpdate: any = {};
+        if (data.descricao !== undefined) transacaoUpdate.descricao = data.descricao;
+        if (data.valor !== undefined) transacaoUpdate.valor = data.valor;
+        if (data.data !== undefined) transacaoUpdate.data = new Date(data.data);
+        if (data.periodicidade !== undefined) transacaoUpdate.periodicidade = data.periodicidade;
+        
+        if (Object.keys(transacaoUpdate).length > 0) {
+            payload.transacao = { update: transacaoUpdate };
+        }
+
         return prisma.despesa.update({ 
             where: { transacaoId: id }, 
-            data 
+            data: payload,
+            include: { transacao: true }
         });
     }
 

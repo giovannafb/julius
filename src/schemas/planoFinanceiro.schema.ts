@@ -12,7 +12,12 @@ export const planoSchema = {
 export const planoBodySchema = {
   type: 'object',
   required: ['nome', 'saldoAtual', 'dataCriacao', 'usuarioId'],
-  properties: planoSchema.properties,
+  properties: {
+    nome: { type: 'string' },
+    saldoAtual: { type: 'number' },
+    dataCriacao: { type: 'string', format: 'date-time' },
+    usuarioId: { type: 'integer' }
+  },
 };
 
 const params = {
@@ -22,7 +27,7 @@ const params = {
 };
 
 export const getPlanoSchema = {
-  schema: { tags: ['Plano Financeiro'], response: { 200: { type: 'array', items: planoSchema } } },
+  schema: { tags: ['Plano Financeiro'], security: [{ bearerAuth: [] }], response: { 200: { type: 'array', items: planoSchema } } },
 };
 
 export const postPlanoSchema = {
@@ -34,9 +39,9 @@ export const getPlanoByIdSchema = {
 };
 
 export const putPlanoSchema = {
-  schema: { tags: ['Plano Financeiro'], params, body: planoBodySchema , security: [{ bearerAuth: [] }],},
+  schema: { tags: ['Plano Financeiro'], params, body: planoBodySchema, security: [{ bearerAuth: [] }], },
 };
 
 export const deletePlanoSchema = {
-  schema: { tags: ['Plano Financeiro'], params , security: [{ bearerAuth: [] }],},
+  schema: { tags: ['Plano Financeiro'], params, security: [{ bearerAuth: [] }], },
 };

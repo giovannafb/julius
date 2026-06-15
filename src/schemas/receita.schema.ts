@@ -4,13 +4,30 @@ export const receitaSchema = {
     transacaoId: { type: 'integer' },
     fonte: { type: 'string' },
     perfilEconomicoId: { type: 'integer', nullable: true },
+    transacao: {
+      type: 'object',
+      properties: {
+        descricao: { type: 'string' },
+        valor: { type: 'number' },
+        data: { type: 'string', format: 'date-time' },
+        tipo: { type: 'string', enum: ['RECEITA', 'DESPESA'] },
+        periodicidade: { type: 'string', enum: ['UNICA', 'DIARIA', 'SEMANAL', 'MENSAL', 'ANUAL'] }
+      }
+    }
   },
 };
 
 export const receitaBodySchema = {
   type: 'object',
-  required: ['transacaoId', 'fonte'],
-  properties: receitaSchema.properties,
+  required: ['descricao', 'valor', 'data', 'periodicidade', 'fonte'],
+  properties: {
+    descricao: { type: 'string' },
+    valor: { type: 'number' },
+    data: { type: 'string', format: 'date-time' },
+    periodicidade: { type: 'string', enum: ['UNICA', 'DIARIA', 'SEMANAL', 'MENSAL', 'ANUAL'] },
+    fonte: { type: 'string' },
+    perfilEconomicoId: { type: 'integer', nullable: true },
+  },
 };
 
 const params = {

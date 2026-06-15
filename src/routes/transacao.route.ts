@@ -11,7 +11,6 @@ import {
 async function transacaoRoutes(fastify: FastifyInstance){
     fastify.get('/', getTransacaoSchema, transacaoController.get);
     fastify.get('/:id', getTransacaoByIdSchema, transacaoController.getParamId);
-    fastify.post('/', postTransacaoSchema, transacaoController.post);
     fastify.put('/:id', putTransacaoSchema, transacaoController.putParamId);
     fastify.delete('/:id', deleteTransacaoSchema, transacaoController.deleteParamId);
 }

@@ -5,15 +5,21 @@ export const transacaoSchema = {
     descricao: { type: 'string' },
     valor: { type: 'number' },
     data: { type: 'string', format: 'date-time' },
-    tipo: { type: 'string' },
-    periodicidade: { type: 'string' }
+    tipo: { type: 'string', enum: ['RECEITA', 'DESPESA'] },
+    periodicidade: { type: 'string', enum: ['UNICA', 'DIARIA', 'SEMANAL', 'MENSAL', 'ANUAL'] }
   },
 };
 
 export const transacaoBodySchema = {
   type: 'object',
   required: ['descricao', 'valor', 'data', 'tipo', 'periodicidade'],
-  properties: transacaoSchema.properties,
+  properties: {
+    descricao: { type: 'string' },
+    valor: { type: 'number' },
+    data: { type: 'string', format: 'date-time' },
+    tipo: { type: 'string', enum: ['RECEITA', 'DESPESA'] },
+    periodicidade: { type: 'string', enum: ['UNICA', 'DIARIA', 'SEMANAL', 'MENSAL', 'ANUAL'] }
+  },
 };
 
 const params = {

@@ -6,7 +6,7 @@ export class DespesaController {
     private repository = new DespesaRepository();
 
     post = async (
-        request: FastifyRequest<{ Body: Despesa }>,
+        request: FastifyRequest<{ Body: any }>,
         reply: FastifyReply
     ) => {
         const json = await this.repository.create(request.body);

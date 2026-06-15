@@ -6,14 +6,22 @@ export const objetivoSchema = {
     valor: { type: 'number' },
     prazo: { type: 'string', format: 'date-time' },
     prioridade: { type: 'integer' },
-    status: { type: 'string' }
+    status: { type: 'string', enum: ['PENDENTE', 'CONCLUIDO'] },
+    planoFinanceiroId: { type: 'integer' }
   },
 };
 
 export const objetivoBodySchema = {
   type: 'object',
-  required: ['nome', 'valor', 'prazo', 'prioridade', 'status'],
-  properties: objetivoSchema.properties,
+  required: ['nome', 'valor', 'prazo', 'prioridade', 'status', 'planoFinanceiroId'],
+  properties: {
+    nome: { type: 'string' },
+    valor: { type: 'number' },
+    prazo: { type: 'string', format: 'date-time' },
+    prioridade: { type: 'integer' },
+    status: { type: 'string', enum: ['PENDENTE', 'CONCLUIDO'] },
+    planoFinanceiroId: { type: 'integer' }
+  },
 };
 
 const params = {

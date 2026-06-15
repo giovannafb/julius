@@ -13,7 +13,13 @@ export const usuarioSchema = {
 export const usuarioBodySchema = {
   type: 'object',
   required: ['nome', 'login', 'senha', 'email', 'telefone'],
-  properties: usuarioSchema.properties,
+  properties: {
+    nome: { type: 'string' },
+    login: { type: 'string' },
+    senha: { type: 'string' },
+    email: { type: 'string' },
+    telefone: { type: 'string' },
+  },
 };
 
 const params = {

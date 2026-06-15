@@ -35,6 +35,9 @@ export class UsuarioController {
         reply: FastifyReply
     ) => {
         try {
+            const dados = request.body;
+            const senhaHash = await argon2.hash(dados.senha);
+            request.body.senha = senhaHash;
             const json = await this.usuarioRepository.update(Number(request.params.id), request.body);
             reply.send(json);
         } catch {

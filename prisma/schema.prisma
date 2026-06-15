@@ -23,11 +23,9 @@ enum Periodicidade {
 enum StatusObjetivo {
   PENDENTE
   CONCLUIDO
-  EXCLUIDO
 }
 
 enum TipoTransacao {
-  TRANSACAO
   RECEITA
   DESPESA
 }
@@ -107,6 +105,7 @@ model ObjetivoFinanceiro {
   planoFinanceiro   PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id])
 
   analisesComprometidas AnaliseImpactoObjetivo[]
+  analisesOriginadas    AnaliseImpacto[] @relation("ObjetivoOrigem")
 
   @@map("ObjetivoFinanceiro")
 }
@@ -118,7 +117,7 @@ model RelatorioMensal {
   totalDespesas       Float    @default(0)
   totalReceita        Float    @default(0)
   saldoFinal          Float    @default(0)
-  conclusaoObjetivos  Float    @default(0)
+  objetivosConcluidos  Float    @default(0)
 
   planoFinanceiroId   Int
   planoFinanceiro     PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id])
@@ -134,8 +133,11 @@ model AnaliseImpacto {
   planoFinanceiroId     Int
   planoFinanceiro       PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id])
 
-  transacaoId           Int
-  transacao             Transacao @relation(fields: [transacaoId], references: [id])
+  transacaoId           Int?
+  transacao             Transacao? @relation(fields: [transacaoId], references: [id])
+
+  objetivoOrigemId      Int?
+  objetivoOrigem        ObjetivoFinanceiro? @relation("ObjetivoOrigem", fields: [objetivoOrigemId], references: [id], onDelete: SetNull)
 
   notificacao           Notificacao?
   objetivosComprometidos AnaliseImpactoObjetivo[]
@@ -178,7 +180,7 @@ model Transacao {
 
 model Receita {
   transacaoId        Int             @id
-  transacao          Transacao       @relation("TransacaoReceita", fields: [transacaoId], references: [id])
+  transacao          Transacao       @relation("TransacaoReceita", fields: [transacaoId], references: [id], onDelete: Cascade)
 
   fonte              String
 
@@ -190,9 +192,7 @@ model Receita {
 
 model Despesa {
   transacaoId        Int             @id
-  transacao          Transacao       @relation("TransacaoDespesa", fields: [transacaoId], references: [id])
-
-  tipo               String
+  transacao          Transacao       @relation("TransacaoDespesa", fields: [transacaoId], references: [id], onDelete: Cascade)
 
   perfilEconomicoId  Int?
   perfilEconomico    PerfilEconomico? @relation("DespesasFixasPerfil", fields: [perfilEconomicoId], references: [id])
@@ -203,10 +203,10 @@ model Despesa {
 
 model AnaliseImpactoObjetivo {
   analiseImpactoId     Int
-  analiseImpacto       AnaliseImpacto     @relation(fields: [analiseImpactoId], references: [id])
+  analiseImpacto       AnaliseImpacto     @relation(fields: [analiseImpactoId], references: [id], onDelete: Cascade)
 
   objetivoFinanceiroId Int
-  objetivoFinanceiro   ObjetivoFinanceiro @relation(fields: [objetivoFinanceiroId], references: [id])
+  objetivoFinanceiro   ObjetivoFinanceiro @relation(fields: [objetivoFinanceiroId], references: [id], onDelete: Cascade)
 
   @@id([analiseImpactoId, objetivoFinanceiroId])
   @@map("AnaliseImpactoObjetivo")

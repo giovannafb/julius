@@ -13,7 +13,13 @@ export const notificacaoSchema = {
 export const notificacaoBodySchema = {
   type: 'object',
   required: ['mensagem', 'tipo', 'dataEnvio', 'analiseImpactoId'],
-  properties: notificacaoSchema.properties,
+  properties: {
+    mensagem: { type: 'string' },
+    tipo: { type: 'string' },
+    dataEnvio: { type: 'string', format: 'date-time' },
+    lida: { type: 'boolean' },
+    analiseImpactoId: { type: 'integer' },
+  },
 };
 
 const params = {

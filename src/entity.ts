@@ -1,11 +1,19 @@
+export enum Periodicidade {
+  UNICA = "UNICA",
+  DIARIA = "DIARIA",
+  SEMANAL = "SEMANAL",
+  MENSAL = "MENSAL",
+  ANUAL = "ANUAL"
+}
+
 export abstract class Transacao {
   constructor(
     private id: number,
     private descricao: string,
     private valor: number,
     private data: Date,
-    private periodicidade: string
-  ) {}
+    private periodicidade: Periodicidade
+  ) { }
 
   public abstract atualizarSaldo(saldoAtual: number): number;
 
@@ -37,11 +45,11 @@ export abstract class Transacao {
     this.data = data;
   }
 
-  public getPeriodicidade(): string {
+  public getPeriodicidade(): Periodicidade {
     return this.periodicidade;
   }
 
-  public setPeriodicidade(periodicidade: string): void {
+  public setPeriodicidade(periodicidade: Periodicidade): void {
     this.periodicidade = periodicidade;
   }
 
@@ -53,7 +61,7 @@ export class Receita extends Transacao {
     descricao: string,
     valor: number,
     data: Date,
-    periodicidade: string,
+    periodicidade: Periodicidade,
     private fonte: string
   ) {
     super(id, descricao, valor, data, periodicidade);
@@ -78,22 +86,13 @@ export class Despesa extends Transacao {
     descricao: string,
     valor: number,
     data: Date,
-    periodicidade: string,
-    private tipo: string
+    periodicidade: Periodicidade,
   ) {
     super(id, descricao, valor, data, periodicidade);
   }
 
   public override atualizarSaldo(saldoAtual: number): number {
     return saldoAtual - this.getValor();
-  }
-
-  public getTipo(): string {
-    return this.tipo;
-  }
-
-  public setTipo(tipo: string): void {
-    this.tipo = tipo;
   }
 }
 
@@ -105,14 +104,10 @@ export class ObjetivoFinanceiro {
     private prazo: Date,
     private prioridade: number,
     private status: string = "PENDENTE"
-  ) {}
+  ) { }
 
   public concluir(): void {
     this.status = "CONCLUIDO";
-  }
-
-  public excluir(): void {
-    this.status = "EXCLUIDO";
   }
 
   public getId(): number {
@@ -167,7 +162,7 @@ export class Notificacao {
     private tipo: string,
     private dataEnvio: Date,
     private lida: boolean = false
-  ) {}
+  ) { }
 
   public enviar(): void {
     console.log(`[${this.tipo}] ${this.mensagem}`);
@@ -234,12 +229,25 @@ export class PerfilEconomico {
   private receitasFixas: Receita[] = [];
   private despesasFixas: Despesa[] = [];
   private historico: Historico;
+  private usuario?: Usuario;
 
   constructor(
     private saldo: number = 0,
-    private status: boolean = true
+    private status: boolean = true,
+    usuario?: Usuario
   ) {
     this.historico = new Historico();
+    if (usuario !== undefined) {
+      this.usuario = usuario;
+    }
+  }
+
+  public getUsuario(): Usuario | undefined {
+    return this.usuario;
+  }
+
+  public setUsuario(usuario: Usuario): void {
+    this.usuario = usuario;
   }
 
   public calcularStatus(): boolean {
@@ -289,8 +297,8 @@ export class RelatorioMensal {
     private totalDespesas: number = 0,
     private totalReceita: number = 0,
     private saldoFinal: number = 0,
-    private conclusaoObjetivos: number = 0
-  ) {}
+    private objetivosConcluidos: number = 0
+  ) { }
 
   public calcularSaldoFinal(): number {
     this.saldoFinal = this.totalReceita - this.totalDespesas;
@@ -304,10 +312,10 @@ export class RelatorioMensal {
       (objetivo) => objetivo.getStatus() === "CONCLUIDO"
     ).length;
 
-    this.conclusaoObjetivos =
+    this.objetivosConcluidos =
       objetivos.length > 0 ? (concluidos / objetivos.length) * 100 : 0;
 
-    return this.conclusaoObjetivos;
+    return this.objetivosConcluidos;
   }
 
   public getMes(): string {
@@ -338,8 +346,8 @@ export class RelatorioMensal {
     return this.saldoFinal;
   }
 
-  public getConclusaoObjetivos(): number {
-    return this.conclusaoObjetivos;
+  public getobjetivosConcluidos(): number {
+    return this.objetivosConcluidos;
   }
 }
 
@@ -351,26 +359,35 @@ export class AnaliseImpacto {
     private id: number,
     private dataAnalise: Date,
     private comprometeObjetivos: boolean = false,
-    private transacao: Transacao
-  ) {}
+    private transacao?: Transacao,
+    private objetivoOrigem?: ObjetivoFinanceiro
+  ) { }
 
   public avaliarViabilidadeObjetivos(
     objetivos: ObjetivoFinanceiro[],
-    saldoProjetado: number
+    saldoAtual: number
   ): boolean {
     this.objetivosComprometidos = objetivos.filter(
       (objetivo) =>
         objetivo.getStatus() !== "CONCLUIDO" &&
-        objetivo.getStatus() !== "EXCLUIDO" &&
-        objetivo.getValor() > saldoProjetado
+        objetivo.getValor() > saldoAtual
     );
 
     this.comprometeObjetivos = this.objetivosComprometidos.length > 0;
 
     if (this.comprometeObjetivos) {
+      const nomesObjetivos = this.objetivosComprometidos.map(o => o.getNome()).join(", ");
+      let mensagem = "Objetivos financeiros comprometidos.";
+
+      if (this.transacao) {
+        mensagem = `A transação '${this.transacao.getDescricao()}' pode comprometer o(s) objetivo(s): ${nomesObjetivos}.`;
+      } else if (this.objetivoOrigem) {
+        mensagem = `O novo objetivo '${this.objetivoOrigem.getNome()}' evidenciou que o saldo é insuficiente para o(s) objetivo(s): ${nomesObjetivos}.`;
+      }
+
       this.notificacao = new Notificacao(
         Date.now(),
-        "A transação pode comprometer objetivos financeiros.",
+        mensagem,
         "ALERTA",
         new Date(),
         false
@@ -392,8 +409,12 @@ export class AnaliseImpacto {
     return this.comprometeObjetivos;
   }
 
-  public getTransacao(): Transacao {
+  public getTransacao(): Transacao | undefined {
     return this.transacao;
+  }
+
+  public getObjetivoOrigem(): ObjetivoFinanceiro | undefined {
+    return this.objetivoOrigem;
   }
 
   public getObjetivosComprometidos(): ObjetivoFinanceiro[] {
@@ -416,10 +437,14 @@ export class PlanoFinanceiro {
     private saldoAtual: number,
     private dataCriacao: Date,
     private economiaMensalNecessaria: number = 0
-  ) {}
+  ) { }
 
   public adicionarObjetivo(objetivo: ObjetivoFinanceiro): void {
     this.objetivos.push(objetivo);
+  }
+
+  public removerObjetivo(id: number): void {
+    this.objetivos = this.objetivos.filter(objetivo => objetivo.getId() !== id);
   }
 
   public gerarRelatorioMensal(relatorio: RelatorioMensal): void {
@@ -432,9 +457,7 @@ export class PlanoFinanceiro {
 
   public calcularEconomiaMensal(): number {
     const objetivosPendentes = this.objetivos.filter(
-      (objetivo) =>
-        objetivo.getStatus() !== "CONCLUIDO" &&
-        objetivo.getStatus() !== "EXCLUIDO" 
+      (objetivo) => objetivo.getStatus() !== "CONCLUIDO"
     );
 
     if (objetivosPendentes.length === 0) {
@@ -513,7 +536,7 @@ export class PlanoFinanceiro {
 
 export class Usuario {
   private planosFinanceiros: PlanoFinanceiro[] = [];
-  private perfilEconomico?: PerfilEconomico;
+  private perfilEconomico: PerfilEconomico;
 
   constructor(
     private id: number,
@@ -521,8 +544,14 @@ export class Usuario {
     private login: string,
     private senha: string,
     private email: string,
-    private telefone: string
-  ) {}
+    private telefone: string,
+    perfilEconomico?: PerfilEconomico
+  ) {
+    this.perfilEconomico = perfilEconomico || new PerfilEconomico(0, true, this);
+    if (!this.perfilEconomico.getUsuario()) {
+      this.perfilEconomico.setUsuario(this);
+    }
+  }
 
   public autenticar(login: string, senha: string): boolean {
     return this.login === login && this.senha === senha;
@@ -594,7 +623,7 @@ export class Usuario {
     return this.planosFinanceiros;
   }
 
-  public getPerfilEconomico(): PerfilEconomico | undefined {
+  public getPerfilEconomico(): PerfilEconomico {
     return this.perfilEconomico;
   }
 }

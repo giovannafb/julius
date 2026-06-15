@@ -6,7 +6,7 @@ export class ReceitaController {
     private repository = new ReceitaRepository();
 
     post = async (
-        request: FastifyRequest<{ Body: Receita }>,
+        request: FastifyRequest<{ Body: any }>,
         reply: FastifyReply
     ) => {
         const json = await this.repository.create(request.body);
@@ -33,7 +33,8 @@ export class ReceitaController {
         try {
             const json = await this.repository.update(Number(request.params.id), request.body);
             reply.send(json);
-        } catch {
+        } catch (error) {
+            console.error('ERROR in ReceitaController.putParamId:', error);
             reply.status(404).send({ message: 'Receita not found' });
         }
     };
