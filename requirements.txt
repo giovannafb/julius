@@ -1,0 +1,32 @@
+# Aviso: Este é um projeto Node.js/TypeScript. 
+# As dependências reais do projeto são gerenciadas pelo arquivo "package.json".
+# Para instalar as dependências, você deve utilizar o comando: npm install
+#
+# Este arquivo requirements.txt foi gerado para fins de documentação
+# ou caso seja uma exigência de entrega da disciplina.
+
+# Dependências de Produção (dependencies)
+@fastify/cors==11.2.0
+@fastify/swagger==9.7.0
+@fastify/swagger-ui==5.2.6
+@hookform/resolvers==5.4.0
+argon2==0.44.0
+dotenv==17.4.2
+fastify==5.8.5
+jsonwebtoken==9.0.3
+pg==8.20.0
+prompt-sync==4.2.0
+react-hook-form==7.76.0
+yup==1.7.1
+
+# Dependências de Desenvolvimento (devDependencies)
+@prisma/adapter-pg==7.8.0
+@prisma/client==7.8.0
+@types/argon2==0.14.1
+@types/jsonwebtoken==9.0.10
+@types/node==25.9.3
+@types/pg==8.20.0
+@types/prompt-sync==4.2.3
+prisma==7.8.0
+tsx==4.22.4
+typescript==6.0.3
