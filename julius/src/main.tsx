@@ -9,11 +9,11 @@ import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 
-import Usuario from './Usuario';
-import ObjetivoFinanceiro from './ObjetivoFinanceiro';
-import Receita from './Receita';
-import Despesa from './Despesa';
-import PlanoFinanceiro from './PlanoFinanceiro';
+import Usuario from './pages/Usuario';
+import ObjetivoFinanceiro from './pages/ObjetivoFinanceiro';
+import Receita from './pages/Receita';
+import Despesa from './pages/Despesa';
+import PlanoFinanceiro from './pages/PlanoFinanceiro';
 
 // Tema com fundo mais cinza claro para o formulário se destacar com o boxShadow branco
 const lightTheme = createTheme({
