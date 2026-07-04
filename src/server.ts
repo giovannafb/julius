@@ -73,7 +73,8 @@ app.addHook('onRequest', async (request, reply) => {
 
     const url = request.url!.split('?')[0] ?? request.url!
     
-    if (PUBLIC_ROUTES.includes(url) || url.startsWith('/swag')) {
+    // Permitir rotas públicas e POST em /usuarios
+    if (PUBLIC_ROUTES.includes(url) || url.startsWith('/swag') || (url === '/usuarios' && request.method === 'POST')) {
         return
     }
 

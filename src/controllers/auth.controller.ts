@@ -24,9 +24,9 @@ export const loginController = async (request: FastifyRequest<{
         return;
     }
     const token = jwt.sign(
-        { login: usuario.login, email: usuario.email },
+        { id: usuario.id, login: usuario.login, email: usuario.email },
         process.env.JWT_SECRET || 'secret',
         { expiresIn: '1h' }
     );
-    reply.status(200).send({ message: 'Login realizado com sucesso!', token });
+    reply.status(200).send({ message: 'Login realizado com sucesso!', token, usuarioId: usuario.id });
 };

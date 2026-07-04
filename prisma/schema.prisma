@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,6 +5,158 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model Usuario {
+  id                Int               @id @default(autoincrement())
+  nome              String
+  login             String            @unique
+  senha             String
+  email             String            @unique
+  telefone          String
+  perfilEconomico   PerfilEconomico?
+  planosFinanceiros PlanoFinanceiro[]
+
+  @@map("Usuario")
+}
+
+model PerfilEconomico {
+  id            Int        @id @default(autoincrement())
+  saldo         Float      @default(0)
+  status        Boolean    @default(true)
+  usuarioId     Int        @unique
+  despesasFixas Despesa[]  @relation("DespesasFixasPerfil")
+  historico     Historico?
+  usuario       Usuario    @relation(fields: [usuarioId], references: [id])
+  receitasFixas Receita[]  @relation("ReceitasFixasPerfil")
+
+  @@map("PerfilEconomico")
+}
+
+model Historico {
+  id                Int             @id @default(autoincrement())
+  perfilEconomicoId Int             @unique
+  perfilEconomico   PerfilEconomico @relation(fields: [perfilEconomicoId], references: [id])
+  transacoes        Transacao[]
+
+  @@map("Historico")
+}
+
+model PlanoFinanceiro {
+  id                       Int                  @id @default(autoincrement())
+  nome                     String
+  saldoAtual               Float
+  dataCriacao              DateTime
+  economiaMensalNecessaria Float                @default(0)
+  usuarioId                Int
+  relatorioImpactos        AnaliseImpacto[]
+  objetivos                ObjetivoFinanceiro[]
+  usuario                  Usuario              @relation(fields: [usuarioId], references: [id])
+  relatoriosMensais        RelatorioMensal[]
+
+  @@map("PlanoFinanceiro")
+}
+
+model ObjetivoFinanceiro {
+  id                    Int                      @id @default(autoincrement())
+  nome                  String
+  valor                 Float
+  prazo                 DateTime
+  prioridade            Int
+  status                StatusObjetivo           @default(PENDENTE)
+  planoFinanceiroId     Int
+  analisesOriginadas    AnaliseImpacto[]         @relation("ObjetivoOrigem")
+  analisesComprometidas AnaliseImpactoObjetivo[]
+  planoFinanceiro       PlanoFinanceiro          @relation(fields: [planoFinanceiroId], references: [id])
+
+  @@map("ObjetivoFinanceiro")
+}
+
+model RelatorioMensal {
+  id                  Int             @id @default(autoincrement())
+  mes                 String
+  dataEmissao         DateTime
+  totalDespesas       Float           @default(0)
+  totalReceita        Float           @default(0)
+  saldoFinal          Float           @default(0)
+  planoFinanceiroId   Int
+  objetivosConcluidos Float           @default(0)
+  planoFinanceiro     PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id])
+
+  @@map("RelatorioMensal")
+}
+
+model AnaliseImpacto {
+  id                     Int                      @id @default(autoincrement())
+  dataAnalise            DateTime
+  comprometeObjetivos    Boolean                  @default(false)
+  planoFinanceiroId      Int
+  transacaoId            Int?
+  objetivoOrigemId       Int?
+  objetivoOrigem         ObjetivoFinanceiro?      @relation("ObjetivoOrigem", fields: [objetivoOrigemId], references: [id])
+  planoFinanceiro        PlanoFinanceiro          @relation(fields: [planoFinanceiroId], references: [id])
+  transacao              Transacao?               @relation(fields: [transacaoId], references: [id])
+  objetivosComprometidos AnaliseImpactoObjetivo[]
+  notificacao            Notificacao?
+
+  @@map("AnaliseImpacto")
+}
+
+model Notificacao {
+  id               Int             @id @default(autoincrement())
+  mensagem         String
+  tipo             TipoNotificacao
+  dataEnvio        DateTime
+  lida             Boolean         @default(false)
+  analiseImpactoId Int             @unique
+  analiseImpacto   AnaliseImpacto  @relation(fields: [analiseImpactoId], references: [id])
+
+  @@map("Notificacao")
+}
+
+model Transacao {
+  id              Int              @id @default(autoincrement())
+  descricao       String
+  valor           Float
+  data            DateTime
+  periodicidade   Periodicidade
+  tipo            TipoTransacao
+  historicoId     Int?
+  analisesImpacto AnaliseImpacto[]
+  despesa         Despesa?         @relation("TransacaoDespesa")
+  receita         Receita?         @relation("TransacaoReceita")
+  historico       Historico?       @relation(fields: [historicoId], references: [id])
+
+  @@map("Transacao")
+}
+
+model Receita {
+  transacaoId       Int              @id
+  fonte             String
+  perfilEconomicoId Int?
+  perfilEconomico   PerfilEconomico? @relation("ReceitasFixasPerfil", fields: [perfilEconomicoId], references: [id])
+  transacao         Transacao        @relation("TransacaoReceita", fields: [transacaoId], references: [id], onDelete: Cascade)
+
+  @@map("Receita")
+}
+
+model Despesa {
+  transacaoId       Int              @id
+  perfilEconomicoId Int?
+  perfilEconomico   PerfilEconomico? @relation("DespesasFixasPerfil", fields: [perfilEconomicoId], references: [id])
+  transacao         Transacao        @relation("TransacaoDespesa", fields: [transacaoId], references: [id], onDelete: Cascade)
+
+  @@map("Despesa")
+}
+
+model AnaliseImpactoObjetivo {
+  analiseImpactoId     Int
+  objetivoFinanceiroId Int
+  analiseImpacto       AnaliseImpacto     @relation(fields: [analiseImpactoId], references: [id], onDelete: Cascade)
+  objetivoFinanceiro   ObjetivoFinanceiro @relation(fields: [objetivoFinanceiroId], references: [id], onDelete: Cascade)
+
+  @@id([analiseImpactoId, objetivoFinanceiroId])
+  @@map("AnaliseImpactoObjetivo")
 }
 
 enum Periodicidade {
@@ -34,180 +181,4 @@ enum TipoNotificacao {
   ALERTA
   INFO
   AVISO
-}
-
-model Usuario {
-  id        Int     @id @default(autoincrement())
-  nome      String
-  login     String  @unique
-  senha     String
-  email     String  @unique
-  telefone  String
-
-  planosFinanceiros PlanoFinanceiro[]
-  perfilEconomico   PerfilEconomico?
-
-  @@map("Usuario")
-}
-
-model PerfilEconomico {
-  id        Int     @id @default(autoincrement())
-  saldo     Float   @default(0)
-  status    Boolean @default(true)
-
-  usuarioId Int     @unique
-  usuario   Usuario @relation(fields: [usuarioId], references: [id])
-
-  historico Historico?
-
-  receitasFixas Receita[] @relation("ReceitasFixasPerfil")
-  despesasFixas Despesa[] @relation("DespesasFixasPerfil")
-
-  @@map("PerfilEconomico")
-}
-
-model Historico {
-  id                Int              @id @default(autoincrement())
-  perfilEconomicoId Int              @unique
-  perfilEconomico   PerfilEconomico  @relation(fields: [perfilEconomicoId], references: [id])
-
-  transacoes        Transacao[]
-
-  @@map("Historico")
-}
-
-model PlanoFinanceiro {
-  id                        Int       @id @default(autoincrement())
-  nome                      String
-  saldoAtual                Float
-  dataCriacao               DateTime
-  economiaMensalNecessaria  Float     @default(0)
-
-  usuarioId                 Int
-  usuario                   Usuario   @relation(fields: [usuarioId], references: [id])
-
-  objetivos          ObjetivoFinanceiro[]
-  relatoriosMensais  RelatorioMensal[]
-  relatorioImpactos  AnaliseImpacto[]
-
-  @@map("PlanoFinanceiro")
-}
-
-model ObjetivoFinanceiro {
-  id          Int             @id @default(autoincrement())
-  nome        String
-  valor       Float
-  prazo       DateTime
-  prioridade  Int
-  status      StatusObjetivo  @default(PENDENTE)
-
-  planoFinanceiroId Int
-  planoFinanceiro   PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id])
-
-  analisesComprometidas AnaliseImpactoObjetivo[]
-  analisesOriginadas    AnaliseImpacto[] @relation("ObjetivoOrigem")
-
-  @@map("ObjetivoFinanceiro")
-}
-
-model RelatorioMensal {
-  id                  Int      @id @default(autoincrement())
-  mes                 String
-  dataEmissao         DateTime
-  totalDespesas       Float    @default(0)
-  totalReceita        Float    @default(0)
-  saldoFinal          Float    @default(0)
-  objetivosConcluidos  Float    @default(0)
-
-  planoFinanceiroId   Int
-  planoFinanceiro     PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id])
-
-  @@map("RelatorioMensal")
-}
-
-model AnaliseImpacto {
-  id                    Int       @id @default(autoincrement())
-  dataAnalise           DateTime
-  comprometeObjetivos   Boolean   @default(false)
-
-  planoFinanceiroId     Int
-  planoFinanceiro       PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id])
-
-  transacaoId           Int?
-  transacao             Transacao? @relation(fields: [transacaoId], references: [id])
-
-  objetivoOrigemId      Int?
-  objetivoOrigem        ObjetivoFinanceiro? @relation("ObjetivoOrigem", fields: [objetivoOrigemId], references: [id], onDelete: SetNull)
-
-  notificacao           Notificacao?
-  objetivosComprometidos AnaliseImpactoObjetivo[]
-
-  @@map("AnaliseImpacto")
-}
-
-model Notificacao {
-  id                Int              @id @default(autoincrement())
-  mensagem          String
-  tipo              TipoNotificacao
-  dataEnvio         DateTime
-  lida              Boolean          @default(false)
-
-  analiseImpactoId  Int              @unique
-  analiseImpacto    AnaliseImpacto   @relation(fields: [analiseImpactoId], references: [id])
-
-  @@map("Notificacao")
-}
-
-
-model Transacao {
-  id             Int            @id @default(autoincrement())
-  descricao      String
-  valor          Float
-  data           DateTime
-  periodicidade  Periodicidade
-  tipo           TipoTransacao
-
-  historicoId    Int?
-  historico      Historico?     @relation(fields: [historicoId], references: [id])
-
-  receita        Receita?       @relation("TransacaoReceita")
-  despesa        Despesa?       @relation("TransacaoDespesa")
-
-  analisesImpacto AnaliseImpacto[]
-
-  @@map("Transacao")
-}
-
-model Receita {
-  transacaoId        Int             @id
-  transacao          Transacao       @relation("TransacaoReceita", fields: [transacaoId], references: [id], onDelete: Cascade)
-
-  fonte              String
-
-  perfilEconomicoId  Int?
-  perfilEconomico    PerfilEconomico? @relation("ReceitasFixasPerfil", fields: [perfilEconomicoId], references: [id])
-
-  @@map("Receita")
-}
-
-model Despesa {
-  transacaoId        Int             @id
-  transacao          Transacao       @relation("TransacaoDespesa", fields: [transacaoId], references: [id], onDelete: Cascade)
-
-  perfilEconomicoId  Int?
-  perfilEconomico    PerfilEconomico? @relation("DespesasFixasPerfil", fields: [perfilEconomicoId], references: [id])
-
-  @@map("Despesa")
-}
-
-
-model AnaliseImpactoObjetivo {
-  analiseImpactoId     Int
-  analiseImpacto       AnaliseImpacto     @relation(fields: [analiseImpactoId], references: [id], onDelete: Cascade)
-
-  objetivoFinanceiroId Int
-  objetivoFinanceiro   ObjetivoFinanceiro @relation(fields: [objetivoFinanceiroId], references: [id], onDelete: Cascade)
-
-  @@id([analiseImpactoId, objetivoFinanceiroId])
-  @@map("AnaliseImpactoObjetivo")
 }

@@ -1,52 +1,94 @@
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-interface ILogin {
-    email: string;
-    senha: string;
-}
+import { useState } from 'react';
+import {
+  Box, Button, TextField, Typography, Snackbar, Alert,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import axios from '../api/axios';
 
-const schema = yup.object({
-    email: yup.string().email('Email inválido').required("Email é obrigatório"),
-    senha: yup.string().min(6, 'Senha deve ter no mínimo 6 caracteres!').required("senha é obrigatória")
-}).required();
+export default function Login() {
+  const { setToken } = useAuth();
+  const navigate = useNavigate();
 
-function Login() {
+  const [login, setLogin] = useState('');
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors }
-    } = useForm<ILogin>({
-        resolver: yupResolver(schema)
-    });
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/auth/login', {
+        login,
+        senha,
+      });
 
-    const onSubmit = (data: ILogin) => {
-        console.log('Login enviado: ', data);
-        alert(`Email: ${data.email}, Senha: ${data.senha}`);
+      const { token, usuarioId } = response.data;
+      setToken(token, usuarioId);
+      navigate('/plano'); // Vai para o plano financeiro (Dashboard principal)
+    } catch (err: any) {
+      setErro(err.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.');
     }
+  };
 
-    return (
-        <>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div>
-                    <label htmlFor='email'>Email:</label>
-                    <input id="email" {...register("email")} />
-                    {errors.email && <div style={{ color: 'red' }}>{errors.email.message}</div>}
-                </div>
+  return (
+    <Box 
+      component="form" 
+      onSubmit={handleLogin}
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        justifyContent: 'center', 
+        height: '70vh', 
+        px: 2, 
+        gap: 2,
+        maxWidth: 400,
+        margin: '0 auto',
+        mt: 8,
+        p: 4,
+        boxShadow: 3,
+        borderRadius: 2,
+        backgroundColor: 'background.paper'
+      }}
+    >
+      <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold', mb: 2 }}>
+        Login
+      </Typography>
+      
+      <TextField 
+        label="Login" 
+        value={login}
+        onChange={(e) => setLogin(e.target.value)} 
+        fullWidth 
+        required
+        variant="outlined"
+      />
+      <TextField 
+        label="Senha" 
+        type="password" 
+        value={senha}
+        onChange={(e) => setSenha(e.target.value)} 
+        fullWidth 
+        required
+        variant="outlined"
+      />
+      
+      <Button type="submit" variant="contained" fullWidth size="large" sx={{ mt: 2 }}>
+        Entrar
+      </Button>
 
-                <div>
-                    <label htmlFor="senha">Senha:</label>
-                    <input type="password" id="senha" {...register("senha")} />
-                    {errors.senha && <div style={{ color: 'red' }}>{errors.senha.message}</div>}
-                </div>
+      <Button variant="text" onClick={() => navigate('/usuario/novo')} fullWidth>
+        Ainda não tem conta? Cadastre-se
+      </Button>
 
-                <button type='submit'>Enviar</button>
-
-            </form>
-        </>
-    );
+      <Snackbar 
+        open={!!erro} 
+        autoHideDuration={4000} 
+        onClose={() => setErro('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setErro('')}>{erro}</Alert>
+      </Snackbar>
+    </Box>
+  );
 }
-
-
-export default Login;
