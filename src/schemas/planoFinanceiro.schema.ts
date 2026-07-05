@@ -3,19 +3,34 @@ export const planoSchema = {
   properties: {
     id: { type: 'integer' },
     nome: { type: 'string' },
-    saldoAtual: { type: 'number' },
     dataCriacao: { type: 'string', format: 'date-time' },
-    usuarioId: { type: 'integer' }
+    economiaMensalNecessaria: { type: 'number' },
+    usuarioId: { type: 'integer' },
+    objetivos: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'integer' },
+          nome: { type: 'string' },
+          valor: { type: 'number' },
+          prazo: { type: 'string', format: 'date-time' },
+          prioridade: { type: 'integer' },
+          status: { type: 'string' },
+          planoFinanceiroId: { type: 'integer' }
+        }
+      }
+    }
   },
 };
 
 export const planoBodySchema = {
   type: 'object',
-  required: ['nome', 'saldoAtual', 'dataCriacao', 'usuarioId'],
+  required: ['nome', 'dataCriacao', 'usuarioId'],
   properties: {
     nome: { type: 'string' },
-    saldoAtual: { type: 'number' },
     dataCriacao: { type: 'string', format: 'date-time' },
+    economiaMensalNecessaria: { type: 'number' },
     usuarioId: { type: 'integer' }
   },
 };

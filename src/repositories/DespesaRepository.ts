@@ -1,5 +1,6 @@
 import { prisma } from '../../lib/prisma.js'
 import type { Despesa } from '../../generated/prisma/client.js';
+import { PerfilEconomicoRepository } from './PerfilEconomicoRepository.js';
 
 export class DespesaRepository {
     public async findAll(): Promise<Despesa[]> {
@@ -29,20 +30,27 @@ export class DespesaRepository {
         };
         if (data.perfilEconomicoId) {
             payload.perfilEconomico = { connect: { id: data.perfilEconomicoId } };
+            payload.transacao.create.historico = { connect: { perfilEconomicoId: data.perfilEconomicoId } };
         }
-        return prisma.despesa.create({
+        const result = await prisma.despesa.create({
             data: payload,
             include: { transacao: true }
         });
+        
+        if (data.perfilEconomicoId) {
+            await new PerfilEconomicoRepository().atualizarSaldo(data.perfilEconomicoId);
+        }
+        
+        return result;
     }
 
     public async update(id: number, data: any): Promise<Despesa> {
         const payload: any = {};
+        const transacaoUpdate: any = {};
         if (data.perfilEconomicoId !== undefined) {
             payload.perfilEconomico = { connect: { id: data.perfilEconomicoId } };
+            transacaoUpdate.historico = { connect: { perfilEconomicoId: data.perfilEconomicoId } };
         }
-
-        const transacaoUpdate: any = {};
         if (data.descricao !== undefined) transacaoUpdate.descricao = data.descricao;
         if (data.valor !== undefined) transacaoUpdate.valor = data.valor;
         if (data.data !== undefined) transacaoUpdate.data = new Date(data.data);
@@ -52,14 +60,26 @@ export class DespesaRepository {
             payload.transacao = { update: transacaoUpdate };
         }
 
-        return prisma.despesa.update({ 
+        const result = await prisma.despesa.update({ 
             where: { transacaoId: id }, 
             data: payload,
             include: { transacao: true }
         });
+        
+        if (result.perfilEconomicoId) {
+            await new PerfilEconomicoRepository().atualizarSaldo(result.perfilEconomicoId);
+        }
+        
+        return result;
     }
 
     public async delete(id: number): Promise<Despesa> {
-        return prisma.despesa.delete({ where: { transacaoId: id } });
+        const result = await prisma.despesa.delete({ where: { transacaoId: id } });
+        
+        if (result.perfilEconomicoId) {
+            await new PerfilEconomicoRepository().atualizarSaldo(result.perfilEconomicoId);
+        }
+        
+        return result;
     }
 }

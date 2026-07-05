@@ -23,9 +23,6 @@ export class PerfilEconomicoRepository {
     }
 
     public async findByUsuarioIdWithDetails(usuarioId: number) {
-        const umMesAtras = new Date();
-        umMesAtras.setMonth(umMesAtras.getMonth() - 1);
-
         return prisma.perfilEconomico.findUnique({
             where: { usuarioId },
             include: {
@@ -38,11 +35,6 @@ export class PerfilEconomicoRepository {
                 historico: {
                     include: {
                         transacoes: {
-                            where: {
-                                data: {
-                                    gte: umMesAtras
-                                }
-                            },
                             orderBy: {
                                 data: 'desc'
                             }
@@ -50,6 +42,25 @@ export class PerfilEconomicoRepository {
                     }
                 }
             }
+        });
+    }
+
+    public async atualizarSaldo(id: number): Promise<void> {
+        const historico = await prisma.historico.findUnique({
+            where: { perfilEconomicoId: id },
+            include: { transacoes: true }
+        });
+        
+        let saldo = 0;
+        if (historico && historico.transacoes) {
+            saldo = historico.transacoes.reduce((acc, t) => {
+                return t.tipo === 'RECEITA' ? acc + t.valor : acc - t.valor;
+            }, 0);
+        }
+
+        await prisma.perfilEconomico.update({
+            where: { id },
+            data: { saldo, status: saldo >= 0 }
         });
     }
 }

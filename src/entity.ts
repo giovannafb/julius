@@ -434,7 +434,6 @@ export class PlanoFinanceiro {
   constructor(
     private id: number,
     private nome: string,
-    private saldoAtual: number,
     private dataCriacao: Date,
     private economiaMensalNecessaria: number = 0
   ) { }
@@ -504,13 +503,7 @@ export class PlanoFinanceiro {
     this.nome = nome;
   }
 
-  public getSaldoAtual(): number {
-    return this.saldoAtual;
-  }
 
-  public setSaldoAtual(saldoAtual: number): void {
-    this.saldoAtual = saldoAtual;
-  }
 
   public getDataCriacao(): Date {
     return this.dataCriacao;

@@ -45,7 +45,7 @@ model Historico {
 model PlanoFinanceiro {
   id                       Int                  @id @default(autoincrement())
   nome                     String
-  saldoAtual               Float
+
   dataCriacao              DateTime
   economiaMensalNecessaria Float                @default(0)
   usuarioId                Int

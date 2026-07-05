@@ -24,7 +24,7 @@ export default function Login() {
 
       const { token, usuarioId } = response.data;
       setToken(token, usuarioId);
-      navigate('/plano'); // Vai para o plano financeiro (Dashboard principal)
+      navigate('/home'); // Vai para a Home (Dashboard principal)
     } catch (err: any) {
       setErro(err.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.');
     }

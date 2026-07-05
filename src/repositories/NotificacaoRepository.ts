@@ -3,7 +3,15 @@ import type { Notificacao } from '../../generated/prisma/client.js';
 
 export class NotificacaoRepository {
     public async findAll(): Promise<Notificacao[]> {
-        return prisma.notificacao.findMany();
+        return prisma.notificacao.findMany({
+            include: {
+                analiseImpacto: {
+                    include: {
+                        planoFinanceiro: true
+                    }
+                }
+            }
+        });
     }
 
     public async findById(id: number): Promise<Notificacao | null> {

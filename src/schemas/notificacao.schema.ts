@@ -7,6 +7,19 @@ export const notificacaoSchema = {
     dataEnvio: { type: 'string', format: 'date-time' },
     lida: { type: 'boolean' },
     analiseImpactoId: { type: 'integer' },
+    analiseImpacto: {
+      type: 'object',
+      nullable: true,
+      properties: {
+        planoFinanceiro: {
+          type: 'object',
+          nullable: true,
+          properties: {
+            usuarioId: { type: 'integer' }
+          }
+        }
+      }
+    }
   },
 };
 

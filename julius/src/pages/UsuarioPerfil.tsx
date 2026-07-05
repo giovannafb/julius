@@ -9,9 +9,22 @@ import Button from '@mui/material/Button';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Alert, Card, CardContent, Divider, Grid, Tabs, Tab, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import SettingsIcon from '@mui/icons-material/Settings';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+
+const schemaUpdate = yup.object({
+    nome: yup.string().required("Nome é obrigatório"),
+    login: yup.string().required("Login é obrigatório"),
+    email: yup.string().email("Email inválido").required("Email é obrigatório"),
+    telefone: yup.string().length(11, "Telefone deve ter 11 dígitos").required("Telefone é obrigatório")
+}).required();
 
 interface IUsuario {
     id: number;
@@ -62,8 +75,82 @@ export default function UsuarioPerfil() {
     const [selectedTransacao, setSelectedTransacao] = useState<ITransacao | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
 
+    // Filtros do Histórico
+    const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+    const [filterTipo, setFilterTipo] = useState<string>('');
+    const [filterPeriodicidade, setFilterPeriodicidade] = useState<string>('');
+    const [filterDataInicio, setFilterDataInicio] = useState<string>('');
+    const [filterDataFim, setFilterDataFim] = useState<string>('');
+
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
+    };
+
+    // Modal de edição de usuário
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const { register, handleSubmit, formState: { errors }, reset } = useForm({
+        resolver: yupResolver(schemaUpdate) as any
+    });
+
+    const handleOpenEdit = () => {
+        if (user) {
+            reset({
+                nome: user.nome,
+                login: user.login,
+                email: user.email,
+                telefone: user.telefone
+            });
+            setEditDialogOpen(true);
+        }
+    };
+
+    const fetchDados = async () => {
+        if (!usuarioId) return;
+        try {
+            const [responseUser, responsePerfil] = await Promise.all([
+                axios.get(`/usuarios/${usuarioId}`),
+                axios.get(`/perfisEconomicos/usuario/${usuarioId}`).catch(() => null)
+            ]);
+            setUser(responseUser.data);
+            if (responsePerfil && responsePerfil.data) {
+                setPerfil(responsePerfil.data);
+            }
+        } catch (err) {
+            console.error("Erro ao recarregar dados", err);
+        }
+    };
+
+    const handleClearHistory = async () => {
+        if (!perfil?.historico?.transacoes?.length) return;
+        if (!window.confirm("Deseja realmente apagar todo o histórico?")) return;
+        try {
+            await Promise.all(perfil.historico.transacoes.map(t => axios.delete(`/transacoes/${t.id}`)));
+            fetchDados();
+        } catch (e) {
+            alert("Erro ao limpar histórico");
+        }
+    };
+
+    const handleDeleteTransacao = async () => {
+        if (!selectedTransacao) return;
+        if (!window.confirm("Deseja apagar esta transação?")) return;
+        try {
+            await axios.delete(`/transacoes/${selectedTransacao.id}`);
+            handleCloseDialog();
+            fetchDados();
+        } catch (e) {
+            alert("Erro ao excluir transação");
+        }
+    };
+
+    const onEditSubmit = async (data: any) => {
+        try {
+            await axios.put(`/usuarios/${user?.id}`, data);
+            setUser({ ...user, ...data } as IUsuario);
+            setEditDialogOpen(false);
+        } catch (err: any) {
+            setErro(err.response?.data?.message || 'Erro ao atualizar usuário');
+        }
     };
 
     const handleOpenDialog = (t: ITransacao) => {
@@ -153,46 +240,79 @@ export default function UsuarioPerfil() {
         return new Date(dateString).toLocaleDateString('pt-BR');
     };
 
+    // Arrays filtrados
+    const receitasPeriodicas = perfil?.receitasFixas?.filter(r => r.transacao.periodicidade !== 'UNICA') || [];
+    const despesasPeriodicas = perfil?.despesasFixas?.filter(d => d.transacao.periodicidade !== 'UNICA') || [];
+
+    const getFilteredHistorico = () => {
+        if (!perfil?.historico?.transacoes) return [];
+        return perfil.historico.transacoes.filter(t => {
+            if (filterTipo && t.tipo !== filterTipo) return false;
+            if (filterPeriodicidade && t.periodicidade !== filterPeriodicidade) return false;
+            if (filterDataInicio || filterDataFim) {
+                const tDate = new Date(t.data).toISOString().split('T')[0];
+                if (filterDataInicio && tDate < filterDataInicio) return false;
+                if (filterDataFim && tDate > filterDataFim) return false;
+            }
+            return true;
+        });
+    };
+    const historicoFiltrado = getFilteredHistorico();
+
     return (
-        <Box sx={{ flexGrow: 1, p: 1, width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <Box sx={{ display: 'flex', gap: 4, flexGrow: 1, minHeight: 0, width: '100%' }}>
-                {/* Lado Esquerdo: Receitas/Despesas e Histórico (Proporção 12) */}
-                <Box sx={{ flex: 12, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', minWidth: 0 }}>
+        <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 }, width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <Box sx={{ display: 'flex', gap: 6, flexGrow: 1, minHeight: 0, width: '100%' }}>
+                {/* Lado Esquerdo: Receitas/Despesas e Histórico (Proporção 65) */}
+                <Box sx={{ flex: 65, display: 'flex', flexDirection: 'column', gap: 4, height: '100%', minWidth: 0 }}>
                     {!perfil ? (
-                        <Alert severity="info">O Perfil Econômico não foi encontrado.</Alert>
+                        <Alert severity="info" sx={{ borderRadius: 3 }}>O Perfil Econômico não foi encontrado.</Alert>
                     ) : (
                         <>
                             {/* Receitas e Despesas Fixas (Metade de cima) */}
-                            <Card variant="outlined" sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 2, boxShadow: 1, minHeight: 0 }}>
-                                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                                    <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth">
-                                        <Tab label="Despesas Fixas" sx={{ fontWeight: 'bold', fontSize: '1rem' }} />
-                                        <Tab label="Receitas Fixas" sx={{ fontWeight: 'bold', fontSize: '1rem' }} />
-                                    </Tabs>
+                            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', minHeight: 0, border: 'none' }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, bgcolor: 'transparent' }}>
+                                    <Box sx={{ display: 'flex', bgcolor: 'rgba(0,0,0,0.04)', borderRadius: 8, p: 0.5 }}>
+                                        <Button
+                                            disableElevation
+                                            variant={tabValue === 0 ? "contained" : "text"}
+                                            onClick={() => setTabValue(0)}
+                                            sx={{ borderRadius: 8, px: 3, py: 1, textTransform: 'none', fontWeight: 'bold', color: tabValue === 0 ? 'white' : 'text.secondary', bgcolor: tabValue === 0 ? '#aa3bff' : 'transparent', '&:hover': { bgcolor: tabValue === 0 ? '#8a2be2' : 'rgba(0,0,0,0.04)' } }}
+                                        >
+                                            Despesas Fixas
+                                        </Button>
+                                        <Button
+                                            disableElevation
+                                            variant={tabValue === 1 ? "contained" : "text"}
+                                            onClick={() => setTabValue(1)}
+                                            sx={{ borderRadius: 8, px: 3, py: 1, textTransform: 'none', fontWeight: 'bold', color: tabValue === 1 ? 'white' : 'text.secondary', bgcolor: tabValue === 1 ? '#aa3bff' : 'transparent', '&:hover': { bgcolor: tabValue === 1 ? '#8a2be2' : 'rgba(0,0,0,0.04)' } }}
+                                        >
+                                            Receitas Fixas
+                                        </Button>
+                                    </Box>
                                 </Box>
-                                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2, bgcolor: 'background.paper', minHeight: 0 }}>
-                                    <Box sx={{
-                                        flexGrow: 1,
-                                        overflowY: 'auto',
-                                        p: 1.5,
-                                        bgcolor: 'grey.50',
-                                        borderRadius: 2,
-                                        border: '1px solid',
-                                        borderColor: 'grey.200',
-                                    }}>
+                                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3, pt: 0, bgcolor: 'transparent', minHeight: 0 }}>
+                                    <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
                                         {tabValue === 0 ? (
                                             /* Despesas Fixas */
-                                            perfil.despesasFixas?.length > 0 ? (
-                                                perfil.despesasFixas.map((d, index) => (
+                                            despesasPeriodicas.length > 0 ? (
+                                                despesasPeriodicas.map((d, index) => (
                                                     <Box
                                                         key={index}
                                                         onClick={() => handleOpenDialog(d.transacao)}
-                                                        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, p: 1.5, bgcolor: 'white', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', cursor: 'pointer', '&:hover': { bgcolor: 'grey.100' } }}
+                                                        sx={{
+                                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2,
+                                                            bgcolor: '#f8f9fa', borderRadius: 3, border: '1px solid #eee',
+                                                            cursor: 'pointer',
+                                                            transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }
+                                                        }}
                                                     >
-                                                        <Box sx={{ flex: 1, minWidth: 0, mr: 2 }}>
-                                                            <Typography variant="body1" fontWeight="bold" noWrap>{d.transacao.descricao}</Typography>
+                                                        <Box sx={{ flex: 1, minWidth: 0, mr: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                            <Box sx={{ display: 'flex', flexShrink: 0 }}>
+                                                                <TrendingDownIcon sx={{ color: 'error.main' }} />
+                                                            </Box>
+                                                            <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{d.transacao.descricao}</Typography>
                                                         </Box>
-                                                        <Typography variant="body1" color="error.main" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }}>
+                                                        <Typography variant="h6" color="error.main" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }}>
                                                             - {formatCurrency(d.transacao.valor)}
                                                         </Typography>
                                                     </Box>
@@ -202,18 +322,26 @@ export default function UsuarioPerfil() {
                                             )
                                         ) : (
                                             /* Receitas Fixas */
-                                            perfil.receitasFixas?.length > 0 ? (
-                                                perfil.receitasFixas.map((r, index) => (
+                                            receitasPeriodicas.length > 0 ? (
+                                                receitasPeriodicas.map((r, index) => (
                                                     <Box
                                                         key={index}
                                                         onClick={() => handleOpenDialog(r.transacao)}
-                                                        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, p: 1.5, bgcolor: 'white', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', cursor: 'pointer', '&:hover': { bgcolor: 'grey.100' } }}
+                                                        sx={{
+                                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2,
+                                                            bgcolor: '#f8f9fa', borderRadius: 3, border: '1px solid #eee',
+                                                            cursor: 'pointer',
+                                                            transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }
+                                                        }}
                                                     >
-                                                        <Box sx={{ flex: 1, minWidth: 0, mr: 2 }}>
-                                                            <Typography variant="body1" fontWeight="bold" noWrap>{r.transacao.descricao}</Typography>
+                                                        <Box sx={{ flex: 1, minWidth: 0, mr: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                            <Box sx={{ display: 'flex', flexShrink: 0 }}>
+                                                                <TrendingUpIcon sx={{ color: 'success.main' }} />
+                                                            </Box>
+                                                            <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{r.transacao.descricao}</Typography>
                                                         </Box>
-                                                        <Typography variant="body1" color="success.main" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }}>
-                                                            {formatCurrency(r.transacao.valor)}
+                                                        <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }}>
+                                                            + {formatCurrency(r.transacao.valor)}
                                                         </Typography>
                                                     </Box>
                                                 ))
@@ -226,46 +354,57 @@ export default function UsuarioPerfil() {
                             </Card>
 
                             {/* Histórico de Transações (Metade de baixo) */}
-                            <Card variant="outlined" sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 2, boxShadow: 1, minHeight: 0 }}>
-                                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2, bgcolor: 'background.paper', minHeight: 0 }}>
-                                    <Typography variant="h6" align="center" fontWeight="bold" color="text.primary" sx={{ mb: 2, flexShrink: 0 }}>
-                                        Histórico
-                                    </Typography>
-                                    <Box sx={{
-                                        flexGrow: 1,
-                                        overflowY: 'auto',
-                                        p: 1.5,
-                                        bgcolor: 'grey.50',
-                                        borderRadius: 2,
-                                        border: '1px solid',
-                                        borderColor: 'grey.200',
-                                    }}>
-                                        {perfil.historico?.transacoes && perfil.historico.transacoes.length > 0 ? (
-                                            perfil.historico.transacoes.map((t) => (
+                            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', minHeight: 0, border: 'none' }}>
+                                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3, bgcolor: '#fafafa', minHeight: 0 }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                        <Typography variant="h6" fontWeight="bold" color="text.primary">
+                                            Histórico Recente
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => setFilterDialogOpen(true)}
+                                                sx={{ color: '#aa3bff', bgcolor: 'rgba(170,59,255,0.05)', '&:hover': { bgcolor: 'rgba(170,59,255,0.1)' } }}
+                                                title="Filtros"
+                                            >
+                                                <FilterListIcon />
+                                            </IconButton>
+                                            <IconButton
+                                                size="small"
+                                                onClick={handleClearHistory}
+                                                sx={{ color: 'error.main', bgcolor: 'rgba(244,67,54,0.05)', '&:hover': { bgcolor: 'rgba(244,67,54,0.1)' } }}
+                                                title="Apagar Histórico"
+                                            >
+                                                <CleaningServicesIcon />
+                                            </IconButton>
+                                        </Box>
+                                    </Box>
+                                    <Divider sx={{ mb: 2 }} />
+                                    <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                        {historicoFiltrado.length > 0 ? (
+                                            historicoFiltrado.map((t) => (
                                                 <Box
                                                     key={t.id}
                                                     onClick={() => handleOpenDialog(t)}
-                                                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, p: 1.5, bgcolor: 'white', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderLeft: 6, borderColor: t.tipo === 'RECEITA' ? 'success.main' : 'error.main', cursor: 'pointer', '&:hover': { bgcolor: 'grey.100' } }}
+                                                    sx={{
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2,
+                                                        bgcolor: '#f8f9fa', borderRadius: 3, border: '1px solid #eee',
+                                                        cursor: 'pointer', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }
+                                                    }}
                                                 >
-                                                    <Box sx={{ flex: 1, minWidth: 0, mr: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                                        <Box sx={{
-                                                            bgcolor: t.tipo === 'RECEITA' ? 'success.light' : 'error.light',
-                                                            borderRadius: '50%',
-                                                            p: 0.5,
-                                                            display: 'flex',
-                                                            flexShrink: 0
-                                                        }}>
-                                                            {t.tipo === 'RECEITA' ? <ArrowUpwardIcon fontSize="small" sx={{ color: 'success.dark' }} /> : <ArrowDownwardIcon fontSize="small" sx={{ color: 'error.dark' }} />}
+                                                    <Box sx={{ flex: 1, minWidth: 0, mr: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        <Box sx={{ display: 'flex', flexShrink: 0 }}>
+                                                            {t.tipo === 'RECEITA' ? <TrendingUpIcon sx={{ color: 'success.main' }} /> : <TrendingDownIcon sx={{ color: 'error.main' }} />}
                                                         </Box>
-                                                        <Typography variant="body1" fontWeight="bold" noWrap>{t.descricao}</Typography>
+                                                        <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{t.descricao}</Typography>
                                                     </Box>
-                                                    <Typography variant="body1" fontWeight="bold" color={t.tipo === 'RECEITA' ? 'success.main' : 'error.main'} sx={{ whiteSpace: 'nowrap' }}>
+                                                    <Typography variant="h6" fontWeight="bold" color={t.tipo === 'RECEITA' ? 'success.main' : 'error.main'} sx={{ whiteSpace: 'nowrap' }}>
                                                         {t.tipo === 'RECEITA' ? '+' : '-'} {formatCurrency(t.valor)}
                                                     </Typography>
                                                 </Box>
                                             ))
                                         ) : (
-                                            <Typography variant="body1" color="text.secondary" align="center" sx={{ mt: 4 }}>Nenhuma transação no último mês.</Typography>
+                                            <Typography variant="body1" color="text.secondary" align="center" sx={{ mt: 4 }}>Nenhuma transação encontrada.</Typography>
                                         )}
                                     </Box>
                                 </CardContent>
@@ -274,68 +413,8 @@ export default function UsuarioPerfil() {
                     )}
                 </Box>
 
-                {/* Lado Direito: Perfil do Usuário e Saldo (Proporção 8) */}
-                <Box sx={{ flex: 8, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', minWidth: 0 }}>
-
-                    {/* Perfil do Usuário */}
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            p: 2,
-                            boxShadow: 2,
-                            borderRadius: 2,
-                            backgroundColor: 'background.paper',
-                            position: 'relative',
-                            flex: 1,
-                            justifyContent: 'center',
-                            minHeight: 0
-                        }}
-                    >
-                        <IconButton
-                            sx={{ position: 'absolute', top: 8, right: 8 }}
-                            color="primary"
-                            onClick={() => navigate(`/usuario/editar/${usuarioId}`)}
-                            title="Editar Perfil"
-                        >
-                            <SettingsIcon />
-                        </IconButton>
-
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 1 }}>
-                            <AccountCircleIcon color="primary" sx={{ fontSize: 50 }} />
-                            <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                                Perfil do Usuário
-                            </Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, px: 1, overflowY: 'auto' }}>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" fontWeight="medium">Nome</Typography>
-                                <Typography variant="body1" fontWeight="bold" noWrap>{user.nome}</Typography>
-                                <Divider sx={{ mt: 0.5 }} />
-                            </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" fontWeight="medium">Login</Typography>
-                                <Typography variant="body1" fontWeight="bold" noWrap>{user.login}</Typography>
-                                <Divider sx={{ mt: 0.5 }} />
-                            </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" fontWeight="medium">Email</Typography>
-                                <Typography variant="body1" fontWeight="bold" noWrap>{user.email}</Typography>
-                                <Divider sx={{ mt: 0.5 }} />
-                            </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" fontWeight="medium">Telefone</Typography>
-                                <Typography variant="body1" fontWeight="bold" noWrap>{user.telefone}</Typography>
-                            </Box>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1.5 }}>
-                            <Button variant="text" size="small" onClick={() => navigate('/plano')}>
-                                Voltar
-                            </Button>
-                        </Box>
-                    </Box>
+                {/* Lado Direito: Perfil do Usuário e Saldo (Proporção 35) */}
+                <Box sx={{ flex: 35, display: 'flex', flexDirection: 'column', gap: 4, height: '100%', minWidth: 0 }}>
 
                     {/* Saldo e Status */}
                     {perfil && (
@@ -343,71 +422,238 @@ export default function UsuarioPerfil() {
                             sx={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
-                                alignItems: 'center',
-                                p: 3,
-                                boxShadow: 2,
-                                borderRadius: 2,
-                                backgroundColor: 'background.paper',
+                                alignItems: 'flex-start',
+                                p: 4,
+                                boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
+                                borderRadius: 4,
+                                background: 'linear-gradient(135deg, #aa3bff 0%, #6d1b9b 100%)',
+                                color: 'white',
                                 flexShrink: 0
                             }}
                         >
-                            <Box>
-                                <Typography variant="h6" color="text.secondary" fontWeight="bold" gutterBottom>Saldo Atual</Typography>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+                                <Typography variant="body1" sx={{ opacity: 0.8, lineHeight: 1 }} fontWeight="bold" gutterBottom>Saldo Atual</Typography>
+                                <Typography variant="h4" sx={{ fontWeight: 'bold', lineHeight: 1, mt: 1 }}>
                                     {formatCurrency(perfil.saldo)}
                                 </Typography>
                             </Box>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="h6" color="text.secondary" fontWeight="bold">Status</Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-start' }}>
+                                <Typography variant="body2" sx={{ opacity: 0.8, lineHeight: 1 }} fontWeight="bold" gutterBottom>Status da Conta</Typography>
                                 <Box
                                     sx={{
-                                        width: 20,
-                                        height: 20,
+                                        width: 24,
+                                        height: 24,
                                         borderRadius: '50%',
-                                        bgcolor: perfil.saldo >= 0 ? 'success.main' : 'error.main',
-                                        boxShadow: 1
+                                        bgcolor: perfil.saldo >= 0 ? '#4caf50' : '#f44336',
+                                        boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+                                        border: '3px solid rgba(255,255,255,0.2)',
+                                        mt: 1
                                     }}
                                 />
                             </Box>
                         </Box>
                     )}
+
+                    {/* Perfil do Usuário */}
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            p: 4,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                            borderRadius: 4,
+                            backgroundColor: 'white',
+                            position: 'relative',
+                            flex: 1,
+                            minHeight: 0
+                        }}
+                    >
+                        <IconButton
+                            sx={{ position: 'absolute', top: 16, right: 16, color: '#aa3bff', bgcolor: 'rgba(170,59,255,0.05)', '&:hover': { bgcolor: 'rgba(170,59,255,0.1)' } }}
+                            onClick={handleOpenEdit}
+                            title="Editar Perfil"
+                        >
+                            <SettingsIcon />
+                        </IconButton>
+
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+                            <AccountCircleIcon sx={{ fontSize: 80, color: '#aa3bff', mb: 1 }} />
+                            <Typography variant="h5" color="text.primary" sx={{ fontWeight: 'bold' }}>
+                                {user.nome}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {user.email}
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, px: 1, overflowY: 'auto' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
+                                <Typography variant="body2" color="text.secondary" fontWeight="bold">Login</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{user.login}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
+                                <Typography variant="body2" color="text.secondary" fontWeight="bold">Telefone</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{user.telefone}</Typography>
+                            </Box>
+                        </Box>
+                    </Box>
                 </Box>
             </Box>
 
+            {/* Modal de Filtros do Histórico */}
+            <Dialog open={filterDialogOpen} onClose={() => setFilterDialogOpen(false)} fullWidth maxWidth="xs">
+                <DialogTitle sx={{ fontWeight: 'bold', color: 'primary.main', borderBottom: 1, borderColor: 'divider' }}>
+                    Filtrar Histórico
+                </DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 3 }}>
+                    <FormControl fullWidth sx={{ mt: 1 }}>
+                        <InputLabel>Tipo</InputLabel>
+                        <Select
+                            value={filterTipo}
+                            label="Tipo"
+                            onChange={(e) => setFilterTipo(e.target.value)}
+                        >
+                            <MenuItem value="">Todos</MenuItem>
+                            <MenuItem value="RECEITA">Receita</MenuItem>
+                            <MenuItem value="DESPESA">Despesa</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth>
+                        <InputLabel>Periodicidade</InputLabel>
+                        <Select
+                            value={filterPeriodicidade}
+                            label="Periodicidade"
+                            onChange={(e) => setFilterPeriodicidade(e.target.value)}
+                        >
+                            <MenuItem value="">Todas</MenuItem>
+                            <MenuItem value="UNICA">Única</MenuItem>
+                            <MenuItem value="DIARIA">Diária</MenuItem>
+                            <MenuItem value="SEMANAL">Semanal</MenuItem>
+                            <MenuItem value="MENSAL">Mensal</MenuItem>
+                            <MenuItem value="ANUAL">Anual</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <FormControl fullWidth>
+                            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, fontWeight: 'bold' }}>Data Início</Typography>
+                            <TextField
+                                type="date"
+                                value={filterDataInicio}
+                                onChange={(e) => setFilterDataInicio(e.target.value)}
+                                fullWidth
+                            />
+                        </FormControl>
+                        <FormControl fullWidth>
+                            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, fontWeight: 'bold' }}>Data Fim</Typography>
+                            <TextField
+                                type="date"
+                                value={filterDataFim}
+                                onChange={(e) => setFilterDataFim(e.target.value)}
+                                fullWidth
+                            />
+                        </FormControl>
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+                    <Button onClick={() => {
+                        setFilterTipo('');
+                        setFilterPeriodicidade('');
+                        setFilterDataInicio('');
+                        setFilterDataFim('');
+                    }} color="inherit">
+                        Limpar Filtros
+                    </Button>
+                    <Button onClick={() => setFilterDialogOpen(false)} variant="contained" color="primary">
+                        Ok
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Modal de Detalhes da Transação */}
-            <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-                <DialogTitle sx={{ fontWeight: 'bold', color: 'primary.main', borderBottom: 1, borderColor: 'divider', pb: 1 }}>
+            <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 4 } }}>
+                <DialogTitle sx={{ fontWeight: 'bold', color: '#aa3bff', borderBottom: 1, borderColor: 'divider', pb: 2 }}>
                     Detalhes da Transação
                 </DialogTitle>
                 <DialogContent sx={{ pt: 3 }}>
                     {selectedTransacao && (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary">Descrição</Typography>
-                                <Typography variant="body1" fontWeight="bold">{selectedTransacao.descricao}</Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
+                                <Typography variant="body2" color="text.secondary" fontWeight="bold">Descrição</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{selectedTransacao.descricao}</Typography>
                             </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary">Valor</Typography>
-                                <Typography variant="h6" color={selectedTransacao.tipo === 'RECEITA' ? 'success.main' : 'error.main'} fontWeight="bold">
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
+                                <Typography variant="body2" color="text.secondary" fontWeight="bold">Valor</Typography>
+                                <Typography variant="body1" color={selectedTransacao.tipo === 'RECEITA' ? 'success.main' : 'error.main'} fontWeight="bold">
                                     {formatCurrency(selectedTransacao.valor)}
                                 </Typography>
                             </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary">Data</Typography>
-                                <Typography variant="body1">{formatDate(selectedTransacao.data)}</Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
+                                <Typography variant="body2" color="text.secondary" fontWeight="bold">Data</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="#333">{formatDate(selectedTransacao.data)}</Typography>
                             </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary">Tipo</Typography>
-                                <Typography variant="body1">{selectedTransacao.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}</Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
+                                <Typography variant="body2" color="text.secondary" fontWeight="bold">Tipo</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="#333">{selectedTransacao.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}</Typography>
                             </Box>
                         </Box>
                     )}
                 </DialogContent>
-                <DialogActions sx={{ p: 2, pt: 0 }}>
-                    <Button onClick={handleCloseDialog} variant="contained" color="primary">
+                <DialogActions sx={{ p: 3, pt: 0, justifyContent: 'space-between' }}>
+                    <Button onClick={handleDeleteTransacao} variant="outlined" color="error" sx={{ borderRadius: 2 }}>
+                        Excluir
+                    </Button>
+                    <Button onClick={handleCloseDialog} variant="contained" sx={{ borderRadius: 2, bgcolor: '#aa3bff', '&:hover': { bgcolor: '#8a2be2' } }}>
                         Fechar
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            {/* Modal de Edição de Perfil */}
+            <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 4 } }}>
+                <DialogTitle sx={{ fontWeight: 'bold', color: '#aa3bff', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <SettingsIcon /> Editar Perfil
+                </DialogTitle>
+                <form onSubmit={handleSubmit(onEditSubmit)}>
+                    <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1 }}>
+                        <TextField
+                            label="Nome"
+                            variant="outlined"
+                            fullWidth
+                            {...register("nome")}
+                            error={!!errors.nome}
+                            helperText={errors.nome?.message as string}
+                        />
+                        <TextField
+                            label="Login"
+                            variant="outlined"
+                            fullWidth
+                            {...register("login")}
+                            error={!!errors.login}
+                            helperText={errors.login?.message as string}
+                        />
+                        <TextField
+                            label="Email"
+                            variant="outlined"
+                            type="email"
+                            fullWidth
+                            {...register("email")}
+                            error={!!errors.email}
+                            helperText={errors.email?.message as string}
+                        />
+                        <TextField
+                            label="Telefone"
+                            variant="outlined"
+                            fullWidth
+                            {...register("telefone")}
+                            error={!!errors.telefone}
+                            helperText={errors.telefone?.message as string}
+                        />
+                    </DialogContent>
+                    <DialogActions sx={{ p: 3, pt: 0 }}>
+                        <Button onClick={() => setEditDialogOpen(false)} color="inherit" sx={{ borderRadius: 2 }}>Cancelar</Button>
+                        <Button type="submit" variant="contained" sx={{ borderRadius: 2, bgcolor: '#aa3bff', '&:hover': { bgcolor: '#8a2be2' } }}>Salvar</Button>
+                    </DialogActions>
+                </form>
             </Dialog>
         </Box>
     );

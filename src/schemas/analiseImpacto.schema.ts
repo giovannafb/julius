@@ -7,6 +7,32 @@ export const analiseImpactoSchema = {
     planoFinanceiroId: { type: 'integer' },
     transacaoId: { type: 'integer', nullable: true },
     objetivoOrigemId: { type: 'integer', nullable: true },
+    objetivoOrigem: {
+      type: 'object',
+      nullable: true,
+      properties: {
+        id: { type: 'integer' },
+        nome: { type: 'string' },
+        valor: { type: 'number' }
+      }
+    },
+    objetivosComprometidos: {
+      type: 'array',
+      nullable: true,
+      items: {
+        type: 'object',
+        properties: {
+          objetivoFinanceiro: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer' },
+              nome: { type: 'string' },
+              valor: { type: 'number' }
+            }
+          }
+        }
+      }
+    }
   },
 };
 

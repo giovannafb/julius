@@ -25,10 +25,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('token');
     }
     
-    if (newUsuarioId !== undefined) {
-      setUsuarioId(newUsuarioId);
-      if (newUsuarioId) {
-        localStorage.setItem('usuarioId', newUsuarioId.toString());
+    let resolvedUsuarioId = newUsuarioId;
+    if (newToken && resolvedUsuarioId === undefined) {
+      try {
+        const payload = JSON.parse(atob(newToken.split('.')[1]));
+        resolvedUsuarioId = payload.id || null;
+      } catch (e) {
+        resolvedUsuarioId = null;
+      }
+    }
+
+    if (resolvedUsuarioId !== undefined) {
+      setUsuarioId(resolvedUsuarioId);
+      if (resolvedUsuarioId) {
+        localStorage.setItem('usuarioId', resolvedUsuarioId.toString());
       } else {
         localStorage.removeItem('usuarioId');
       }
