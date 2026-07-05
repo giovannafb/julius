@@ -269,7 +269,7 @@ export default function UsuarioPerfil() {
                     ) : (
                         <>
                             {/* Receitas e Despesas Fixas (Metade de cima) */}
-                            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', minHeight: 0, border: 'none' }}>
+                            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 4, minHeight: 0, border: 'none' }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, bgcolor: 'transparent' }}>
                                     <Box sx={{ display: 'flex', bgcolor: 'rgba(0,0,0,0.04)', borderRadius: 8, p: 0.5 }}>
                                         <Button
@@ -301,7 +301,7 @@ export default function UsuarioPerfil() {
                                                         onClick={() => handleOpenDialog(d.transacao)}
                                                         sx={{
                                                             display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2,
-                                                            bgcolor: '#f8f9fa', borderRadius: 3, border: '1px solid #eee',
+                                                            bgcolor: 'background.paper', borderRadius: 3, border: '1px solid #eee',
                                                             cursor: 'pointer',
                                                             transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }
                                                         }}
@@ -310,7 +310,7 @@ export default function UsuarioPerfil() {
                                                             <Box sx={{ display: 'flex', flexShrink: 0 }}>
                                                                 <TrendingDownIcon sx={{ color: 'error.main' }} />
                                                             </Box>
-                                                            <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{d.transacao.descricao}</Typography>
+                                                            <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>{d.transacao.descricao}</Typography>
                                                         </Box>
                                                         <Typography variant="h6" color="error.main" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }}>
                                                             - {formatCurrency(d.transacao.valor)}
@@ -329,7 +329,7 @@ export default function UsuarioPerfil() {
                                                         onClick={() => handleOpenDialog(r.transacao)}
                                                         sx={{
                                                             display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2,
-                                                            bgcolor: '#f8f9fa', borderRadius: 3, border: '1px solid #eee',
+                                                            bgcolor: 'background.paper', borderRadius: 3, border: '1px solid #eee',
                                                             cursor: 'pointer',
                                                             transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }
                                                         }}
@@ -338,7 +338,7 @@ export default function UsuarioPerfil() {
                                                             <Box sx={{ display: 'flex', flexShrink: 0 }}>
                                                                 <TrendingUpIcon sx={{ color: 'success.main' }} />
                                                             </Box>
-                                                            <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{r.transacao.descricao}</Typography>
+                                                            <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>{r.transacao.descricao}</Typography>
                                                         </Box>
                                                         <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }}>
                                                             + {formatCurrency(r.transacao.valor)}
@@ -354,8 +354,8 @@ export default function UsuarioPerfil() {
                             </Card>
 
                             {/* Histórico de Transações (Metade de baixo) */}
-                            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', minHeight: 0, border: 'none' }}>
-                                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3, bgcolor: '#fafafa', minHeight: 0 }}>
+                            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 4, minHeight: 0, border: 'none' }}>
+                                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3, minHeight: 0 }}>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                         <Typography variant="h6" fontWeight="bold" color="text.primary">
                                             Histórico Recente
@@ -364,7 +364,7 @@ export default function UsuarioPerfil() {
                                             <IconButton
                                                 size="small"
                                                 onClick={() => setFilterDialogOpen(true)}
-                                                sx={{ color: '#aa3bff', bgcolor: 'rgba(170,59,255,0.05)', '&:hover': { bgcolor: 'rgba(170,59,255,0.1)' } }}
+                                                sx={{ color: '#00e676', bgcolor: 'rgba(170,59,255,0.05)', '&:hover': { bgcolor: 'rgba(170,59,255,0.1)' } }}
                                                 title="Filtros"
                                             >
                                                 <FilterListIcon />
@@ -388,7 +388,7 @@ export default function UsuarioPerfil() {
                                                     onClick={() => handleOpenDialog(t)}
                                                     sx={{
                                                         display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2,
-                                                        bgcolor: '#f8f9fa', borderRadius: 3, border: '1px solid #eee',
+                                                        bgcolor: 'background.paper', borderRadius: 3, border: '1px solid #eee',
                                                         cursor: 'pointer', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }
                                                     }}
                                                 >
@@ -396,7 +396,7 @@ export default function UsuarioPerfil() {
                                                         <Box sx={{ display: 'flex', flexShrink: 0 }}>
                                                             {t.tipo === 'RECEITA' ? <TrendingUpIcon sx={{ color: 'success.main' }} /> : <TrendingDownIcon sx={{ color: 'error.main' }} />}
                                                         </Box>
-                                                        <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{t.descricao}</Typography>
+                                                        <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>{t.descricao}</Typography>
                                                     </Box>
                                                     <Typography variant="h6" fontWeight="bold" color={t.tipo === 'RECEITA' ? 'success.main' : 'error.main'} sx={{ whiteSpace: 'nowrap' }}>
                                                         {t.tipo === 'RECEITA' ? '+' : '-'} {formatCurrency(t.valor)}
@@ -426,7 +426,7 @@ export default function UsuarioPerfil() {
                                 p: 4,
                                 boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
                                 borderRadius: 4,
-                                background: 'linear-gradient(135deg, #aa3bff 0%, #6d1b9b 100%)',
+                                background: 'linear-gradient(135deg, #00e676 0%, #6d1b9b 100%)',
                                 color: 'white',
                                 flexShrink: 0
                             }}
@@ -455,21 +455,20 @@ export default function UsuarioPerfil() {
                     )}
 
                     {/* Perfil do Usuário */}
-                    <Box
-                        sx={{
+                    <Card
+                        sx={(theme) => ({
                             display: 'flex',
                             flexDirection: 'column',
                             p: 4,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                             borderRadius: 4,
-                            backgroundColor: 'white',
                             position: 'relative',
                             flex: 1,
-                            minHeight: 0
-                        }}
+                            minHeight: 0,
+                            boxShadow: theme.palette.mode === 'dark' ? '0 0 50px rgba(0, 230, 118, 0.4)' : '0 4px 40px rgba(0, 230, 118, 0.25)'
+                        })}
                     >
                         <IconButton
-                            sx={{ position: 'absolute', top: 16, right: 16, color: '#aa3bff', bgcolor: 'rgba(170,59,255,0.05)', '&:hover': { bgcolor: 'rgba(170,59,255,0.1)' } }}
+                            sx={{ position: 'absolute', top: 16, right: 16, color: '#00e676', bgcolor: 'rgba(170,59,255,0.05)', '&:hover': { bgcolor: 'rgba(170,59,255,0.1)' } }}
                             onClick={handleOpenEdit}
                             title="Editar Perfil"
                         >
@@ -477,7 +476,7 @@ export default function UsuarioPerfil() {
                         </IconButton>
 
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-                            <AccountCircleIcon sx={{ fontSize: 80, color: '#aa3bff', mb: 1 }} />
+                            <AccountCircleIcon sx={{ fontSize: 80, color: '#00e676', mb: 1 }} />
                             <Typography variant="h5" color="text.primary" sx={{ fontWeight: 'bold' }}>
                                 {user.nome}
                             </Typography>
@@ -489,14 +488,14 @@ export default function UsuarioPerfil() {
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, px: 1, overflowY: 'auto' }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
                                 <Typography variant="body2" color="text.secondary" fontWeight="bold">Login</Typography>
-                                <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{user.login}</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>{user.login}</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
                                 <Typography variant="body2" color="text.secondary" fontWeight="bold">Telefone</Typography>
-                                <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{user.telefone}</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>{user.telefone}</Typography>
                             </Box>
                         </Box>
-                    </Box>
+                    </Card>
                 </Box>
             </Box>
 
@@ -571,7 +570,7 @@ export default function UsuarioPerfil() {
 
             {/* Modal de Detalhes da Transação */}
             <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 4 } }}>
-                <DialogTitle sx={{ fontWeight: 'bold', color: '#aa3bff', borderBottom: 1, borderColor: 'divider', pb: 2 }}>
+                <DialogTitle sx={{ fontWeight: 'bold', color: '#00e676', borderBottom: 1, borderColor: 'divider', pb: 2 }}>
                     Detalhes da Transação
                 </DialogTitle>
                 <DialogContent sx={{ pt: 3 }}>
@@ -579,7 +578,7 @@ export default function UsuarioPerfil() {
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
                                 <Typography variant="body2" color="text.secondary" fontWeight="bold">Descrição</Typography>
-                                <Typography variant="body1" fontWeight="bold" color="#333" noWrap>{selectedTransacao.descricao}</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>{selectedTransacao.descricao}</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
                                 <Typography variant="body2" color="text.secondary" fontWeight="bold">Valor</Typography>
@@ -589,11 +588,11 @@ export default function UsuarioPerfil() {
                             </Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
                                 <Typography variant="body2" color="text.secondary" fontWeight="bold">Data</Typography>
-                                <Typography variant="body1" fontWeight="bold" color="#333">{formatDate(selectedTransacao.data)}</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="text.primary">{formatDate(selectedTransacao.data)}</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', pb: 1 }}>
                                 <Typography variant="body2" color="text.secondary" fontWeight="bold">Tipo</Typography>
-                                <Typography variant="body1" fontWeight="bold" color="#333">{selectedTransacao.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}</Typography>
+                                <Typography variant="body1" fontWeight="bold" color="text.primary">{selectedTransacao.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}</Typography>
                             </Box>
                         </Box>
                     )}
@@ -602,7 +601,7 @@ export default function UsuarioPerfil() {
                     <Button onClick={handleDeleteTransacao} variant="outlined" color="error" sx={{ borderRadius: 2 }}>
                         Excluir
                     </Button>
-                    <Button onClick={handleCloseDialog} variant="contained" sx={{ borderRadius: 2, bgcolor: '#aa3bff', '&:hover': { bgcolor: '#8a2be2' } }}>
+                    <Button onClick={handleCloseDialog} variant="contained" sx={{ borderRadius: 2, bgcolor: '#00e676', '&:hover': { bgcolor: '#00c853' } }}>
                         Fechar
                     </Button>
                 </DialogActions>
@@ -610,7 +609,7 @@ export default function UsuarioPerfil() {
 
             {/* Modal de Edição de Perfil */}
             <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 4 } }}>
-                <DialogTitle sx={{ fontWeight: 'bold', color: '#aa3bff', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <DialogTitle sx={{ fontWeight: 'bold', color: '#00e676', display: 'flex', alignItems: 'center', gap: 1 }}>
                     <SettingsIcon /> Editar Perfil
                 </DialogTitle>
                 <form onSubmit={handleSubmit(onEditSubmit)}>
@@ -651,7 +650,7 @@ export default function UsuarioPerfil() {
                     </DialogContent>
                     <DialogActions sx={{ p: 3, pt: 0 }}>
                         <Button onClick={() => setEditDialogOpen(false)} color="inherit" sx={{ borderRadius: 2 }}>Cancelar</Button>
-                        <Button type="submit" variant="contained" sx={{ borderRadius: 2, bgcolor: '#aa3bff', '&:hover': { bgcolor: '#8a2be2' } }}>Salvar</Button>
+                        <Button type="submit" variant="contained" sx={{ borderRadius: 2, bgcolor: '#00e676', '&:hover': { bgcolor: '#00c853' } }}>Salvar</Button>
                     </DialogActions>
                 </form>
             </Dialog>

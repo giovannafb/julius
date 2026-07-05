@@ -99,13 +99,14 @@ export default function RelatorioMensal() {
       ) : erro ? (
         <Alert severity="error">{erro}</Alert>
       ) : (
-        <Card sx={{ 
+        <Card sx={(theme) => ({ 
             borderRadius: 6, 
             border: 'none', 
             background: 'linear-gradient(145deg, var(--card-bg) 0%, rgba(170,59,255,0.03) 100%)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-            p: { xs: 2, md: 4 }
-        }}>
+            boxShadow: theme.palette.mode === 'dark' ? '0 0 50px rgba(0, 230, 118, 0.4)' : '0 4px 40px rgba(0, 230, 118, 0.25)',
+            p: { xs: 2, md: 4 },
+            overflow: 'visible'
+        })}>
           <CardContent>
             <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 4, color: 'var(--text-h)', textAlign: 'center' }}>
               Resumo de {MESES[mesSelecionado]}

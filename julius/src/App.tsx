@@ -8,9 +8,13 @@ import Badge from '@mui/material/Badge';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useAuth } from './auth/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from './api/axios';
+import { ColorModeContext } from './ThemeContext';
 
 import UsuarioList from './pages/UsuarioList';
 import Usuario from './pages/Usuario'; // This is the Form
@@ -27,7 +31,9 @@ import PrivateRoute from './routes/PrivateRoute';
 
 function Navigation() {
   const { token, usuarioId, logout } = useAuth();
+  const { mode, toggleColorMode } = useContext(ColorModeContext);
   const [unreadCount, setUnreadCount] = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     if (token && usuarioId) {
@@ -53,28 +59,40 @@ function Navigation() {
   return (
     <AppBar position="static" color="primary" elevation={1}>
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', px: { xs: 2, md: 4 } }}>
-        <Button color="inherit" component={Link} to="/home" sx={{ display: 'flex', alignItems: 'center', gap: 1, textTransform: 'none', fontSize: '1.2rem', fontWeight: 'bold' }}>
-          <img src="/logo.png" alt="Julius Logo" style={{ height: '36px' }} />
-          Julius
-        </Button>
-        
-        {token ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color="inherit" component={Link} to="/notificacoes" title="Notificações">
-              <Badge badgeContent={unreadCount} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <IconButton color="inherit" component={Link} to="/usuario/perfil" title="Perfil do Usuário">
-              <AccountCircleIcon />
-            </IconButton>
-            <IconButton color="inherit" onClick={logout} title="Sair">
-              <LogoutIcon />
-            </IconButton>
-          </Box>
-        ) : (
-          <Button color="inherit" component={Link} to="/login">Login</Button>
-        )}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {location.pathname !== '/login' && location.pathname !== '/' && (
+            <Button color="inherit" component={Link} to="/home" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, textTransform: 'none', fontSize: '1.5rem', fontFamily: '"Cinzel", serif', fontWeight: 'bold' }}>
+              <img src="/logo_extraida_cropped.png" alt="Julius Logo" style={{ height: '40px', filter: 'brightness(0) invert(1)', display: 'block' }} />
+              Julius
+            </Button>
+          )}
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton color="inherit" onClick={toggleColorMode} title="Mudar Tema">
+            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
+          
+          {token ? (
+            <>
+              <IconButton color="inherit" component={Link} to="/notificacoes" title="Notificações">
+                <Badge badgeContent={unreadCount} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+              <IconButton color="inherit" component={Link} to="/usuario/perfil" title="Perfil do Usuário">
+                <AccountCircleIcon />
+              </IconButton>
+              <IconButton color="inherit" onClick={logout} title="Sair">
+                <LogoutIcon />
+              </IconButton>
+            </>
+          ) : (
+            location.pathname !== '/login' && location.pathname !== '/' && (
+              <Button color="inherit" component={Link} to="/login">Login</Button>
+            )
+          )}
+        </Box>
       </Toolbar>
     </AppBar>
   );

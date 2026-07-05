@@ -183,7 +183,7 @@ export default function Despesa() {
                                     onClick={() => abrirModalEditar(desp)}
                                     sx={{ 
                                         p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                                        bgcolor: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', 
+                                        bgcolor: 'background.paper', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', 
                                         transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'pointer',
                                         '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' } 
                                     }}
@@ -193,7 +193,7 @@ export default function Despesa() {
                                             <AttachMoneyIcon sx={{ color: 'error.dark' }} />
                                         </Box>
                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333', lineHeight: 1.2 }}>
+                                            <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary', lineHeight: 1.2 }}>
                                                 {desp.transacao.descricao}
                                             </Typography>
                                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>

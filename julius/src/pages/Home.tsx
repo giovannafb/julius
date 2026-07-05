@@ -270,9 +270,11 @@ export default function Home() {
                     ) : (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {planos.length === 0 ? (
+                                <Card sx={(theme) => ({ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', p: 0, borderRadius: 4, boxShadow: theme.palette.mode === 'dark' ? '0 0 50px rgba(0, 230, 118, 0.4)' : '0 4px 40px rgba(0, 230, 118, 0.25)' })}>
                                 <Box sx={{ p: 5, textAlign: 'center', bgcolor: 'background.paper', borderRadius: 4, border: '1px dashed', borderColor: 'divider' }}>
                                     <Typography variant="body1" color="textSecondary">Nenhum plano financeiro encontrado. Crie um para começar!</Typography>
                                 </Box>
+                                </Card>
                             ) : (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     {planos.length > 1 && (
@@ -302,18 +304,18 @@ export default function Home() {
                                             const economiaMensal = calcularEconomiaMensal(plano.objetivos);
                                             const totalDespesa = calcularTotalDespesa(plano.objetivos);
                                             return (
-                                                <Card key={plano.id} sx={{ 
+                                                <Card key={plano.id} sx={(theme) => ({ 
                                                     borderRadius: 6, 
-                                                    bgcolor: '#fff', 
-                                                    border: '1px solid',
-                                                    borderColor: 'divider',
-                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                                                    p: 4
-                                                }}>
+                                                    bgcolor: 'background.paper', 
+                                                    border: 'none',
+                                                    boxShadow: theme.palette.mode === 'dark' ? '0 0 50px rgba(0, 230, 118, 0.4)' : '0 4px 40px rgba(0, 230, 118, 0.25)',
+                                                    p: 4,
+                                                    overflow: 'visible'
+                                                })}>
                                                     {/* Top Row */}
                                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
                                                         <Box>
-                                                            <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333' }}>
+                                                            <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                                                                 {plano.nome}
                                                             </Typography>
                                                             {planos.length > 1 && (
@@ -323,12 +325,14 @@ export default function Home() {
                                                             )}
                                                         </Box>
                                                         <Box sx={{ textAlign: 'right' }}>
-                                                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#ff3b7c', lineHeight: 1 }}>
-                                                                Economia Mensal:
-                                                            </Typography>
-                                                            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#ff3b7c', lineHeight: 1, mt: 0.5 }}>
-                                                                R$ {economiaMensal.toFixed(2)}
-                                                            </Typography>
+                                                            <Box sx={{ p: 2, bgcolor: 'rgba(170, 59, 255, 0.05)', borderRadius: 2, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                                                <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#aa3bff' }}>
+                                                                    Economia Mensal
+                                                                </Typography>
+                                                                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#aa3bff' }}>
+                                                                    R$ {economiaMensal.toFixed(2)}
+                                                                </Typography>
+                                                            </Box>
                                                         </Box>
                                                     </Box>
 
@@ -343,7 +347,7 @@ export default function Home() {
                                                                     onClick={() => handleOpenObjetivo(plano.id!)}
                                                                     sx={{ 
                                                                         borderRadius: 3, 
-                                                                        bgcolor: '#f9f9f9', 
+                                                                        bgcolor: 'background.paper', 
                                                                         border: '1px dashed #ccc',
                                                                         px: 3, py: 1.5,
                                                                         cursor: 'pointer',
@@ -369,7 +373,7 @@ export default function Home() {
                                                                         onClick={() => handleOpenObjetivo(plano.id!, obj)}
                                                                         sx={{ 
                                                                             borderRadius: 3, 
-                                                                            bgcolor: '#fff', 
+                                                                            bgcolor: 'background.paper', 
                                                                             border: '1px solid #eee',
                                                                             px: 3, py: 1.5,
                                                                             cursor: 'pointer',
@@ -385,7 +389,7 @@ export default function Home() {
                                                                             ? <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 20 }} /> 
                                                                             : <RadioButtonUncheckedIcon sx={{ color: '#ff9800', fontSize: 20 }} />
                                                                         }
-                                                                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#333' }} noWrap>
+                                                                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary' }} noWrap>
                                                                             {obj.nome}
                                                                         </Typography>
                                                                     </Card>
@@ -401,7 +405,7 @@ export default function Home() {
                                                         </Typography>
                                                         
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                                                            <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#333' }}>
+                                                            <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                                                                 Total de Despesas: <span style={{ color: '#aa3bff' }}>R$ {totalDespesa.toFixed(2)}</span>
                                                             </Typography>
                                                             <Box>
@@ -444,13 +448,13 @@ export default function Home() {
                                 sx={{ 
                                     display: 'flex', alignItems: 'center', p: 3, cursor: 'pointer',
                                     transition: 'all 0.3s', borderRadius: 4,
-                                    bgcolor: '#fff', border: '1px solid #eee',
+                                    bgcolor: 'background.paper', border: '1px solid #eee',
                                     boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                                     '&:hover': { transform: 'translateX(-5px)', boxShadow: '0 6px 16px rgba(0,0,0,0.08)', borderColor: item.color }
                                 }}
                             >
                                 <Box sx={{ color: item.color, mr: 2, display: 'flex' }}>{item.icon}</Box>
-                                <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333' }}>{item.title}</Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' }}>{item.title}</Typography>
                             </Card>
                         ))}
                     </Box>
