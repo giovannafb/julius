@@ -15,6 +15,8 @@ async function perfilEconomicoRoutes(fastify: FastifyInstance) {
 
     fastify.get('/:id', getPerfilByIdSchema, perfilEconomicoController.getParamId);
 
+    fastify.get('/usuario/:usuarioId', perfilEconomicoController.getByUsuarioId);
+
     fastify.post('/', postPerfilSchema, perfilEconomicoController.post);
 
     fastify.put('/:id', putPerfilSchema, perfilEconomicoController.putParamId);

@@ -22,6 +22,11 @@ export class PerfilEconomicoController {
         json ? reply.send(json) : reply.status(404).send({ message: 'Not found' });
     };
 
+    getByUsuarioId = async (request: FastifyRequest<{Params: { usuarioId: string }}>, reply: FastifyReply) => {
+        const json = await this.repository.findByUsuarioIdWithDetails(Number(request.params.usuarioId));
+        json ? reply.send(json) : reply.status(404).send({ message: 'Perfil Econômico não encontrado para este usuário.' });
+    };
+
     putParamId = async (request: FastifyRequest<IdParams & { Body: Omit<PerfilEconomico, 'id'> }>, reply: FastifyReply) => {
         try {
             const json = await this.repository.update(Number(request.params.id), request.body);

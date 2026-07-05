@@ -21,4 +21,35 @@ export class PerfilEconomicoRepository {
     public async delete(id: number): Promise<PerfilEconomico> {
         return prisma.perfilEconomico.delete({ where: { id } });
     }
+
+    public async findByUsuarioIdWithDetails(usuarioId: number) {
+        const umMesAtras = new Date();
+        umMesAtras.setMonth(umMesAtras.getMonth() - 1);
+
+        return prisma.perfilEconomico.findUnique({
+            where: { usuarioId },
+            include: {
+                receitasFixas: {
+                    include: { transacao: true }
+                },
+                despesasFixas: {
+                    include: { transacao: true }
+                },
+                historico: {
+                    include: {
+                        transacoes: {
+                            where: {
+                                data: {
+                                    gte: umMesAtras
+                                }
+                            },
+                            orderBy: {
+                                data: 'desc'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 }
