@@ -2,6 +2,7 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
 import { UsuarioRepository } from '../repositories/UsuarioRepository.js';
 import type { Usuario } from '../../generated/prisma/client.js';
 import argon2 from 'argon2'; // Adicione o import
+import { prisma } from '../../lib/prisma.js';
 
 export class UsuarioController {
     private usuarioRepository = new UsuarioRepository();
@@ -14,6 +15,19 @@ export class UsuarioController {
         const senhaHash = await argon2.hash(dados.senha);
         request.body.senha = senhaHash;
         const json = await this.usuarioRepository.create(request.body);
+        
+        // Criar perfil econômico zerado e com histórico para o novo usuário
+        await prisma.perfilEconomico.create({
+            data: {
+                usuarioId: json.id,
+                saldo: 0,
+                status: true,
+                historico: {
+                    create: {}
+                }
+            }
+        });
+
         reply.status(201).send(json);
     };
 
@@ -31,13 +45,15 @@ export class UsuarioController {
     };
 
     putParamId = async (
-        request: FastifyRequest<{ Params: { id: string }, Body: Omit<Usuario, 'id'> }>,
+        request: FastifyRequest<{ Params: { id: string }, Body: Partial<Omit<Usuario, 'id'>> }>,
         reply: FastifyReply
     ) => {
         try {
             const dados = request.body;
-            const senhaHash = await argon2.hash(dados.senha);
-            request.body.senha = senhaHash;
+            if (dados.senha) {
+                const senhaHash = await argon2.hash(dados.senha);
+                request.body.senha = senhaHash;
+            }
             const json = await this.usuarioRepository.update(Number(request.params.id), request.body);
             reply.send(json);
         } catch {

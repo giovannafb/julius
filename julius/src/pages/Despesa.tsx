@@ -223,9 +223,9 @@ export default function Despesa() {
                 </DialogTitle>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <TextField label="Descrição" placeholder="Ex: Conta de Luz" {...register("descricao")} error={!!errors.descricao} helperText={errors.descricao?.message} />
-                        <TextField label="Valor (R$)" type="number" inputProps={{ step: "0.01" }} {...register("valor")} error={!!errors.valor} helperText={errors.valor?.message} />
-                        <TextField label="Data" type="date" InputLabelProps={{ shrink: true }} {...register("data")} error={!!errors.data} helperText={errors.data?.message} />
+                        <TextField label="Descrição" placeholder="Ex: Conta de Luz" slotProps={{ inputLabel: { shrink: true } }} {...register("descricao")} error={!!errors.descricao} helperText={errors.descricao?.message} />
+                        <TextField label="Valor (R$)" type="number" slotProps={{ htmlInput: { step: "0.01" }, inputLabel: { shrink: true } }} {...register("valor")} error={!!errors.valor} helperText={errors.valor?.message} />
+                        <TextField label="Data" type="date" slotProps={{ inputLabel: { shrink: true } }} {...register("data")} error={!!errors.data} helperText={errors.data?.message} />
                         <TextField select label="Periodicidade" defaultValue="MENSAL" {...register("periodicidade")} error={!!errors.periodicidade} helperText={errors.periodicidade?.message}>
                             <MenuItem value="UNICA">Única</MenuItem>
                             <MenuItem value="DIARIA">Diária</MenuItem>

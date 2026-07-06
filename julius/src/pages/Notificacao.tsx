@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Card, CircularProgress, Alert, Container, List, ListItem, ListItemText, ListItemIcon } from '@mui/material';
+import { Box, Typography, Card, CircularProgress, Alert, Container, List, ListItem, ListItemText, ListItemIcon, IconButton } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from '../api/axios';
 import { useAuth } from '../auth/AuthContext';
 
@@ -45,6 +46,15 @@ export default function Notificacao() {
     fetchNotificacoes();
   }, [usuarioId]);
 
+  const handleDelete = async (id: number) => {
+      try {
+          await axios.delete(`/notificacoes/${id}`);
+          setNotificacoes(prev => prev.filter(n => n.id !== id));
+      } catch (err) {
+          setErro('Erro ao apagar notificação.');
+      }
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
@@ -65,7 +75,15 @@ export default function Notificacao() {
             ) : (
                 <List>
                     {notificacoes.map((notif, index) => (
-                        <ListItem key={notif.id} divider={index < notificacoes.length - 1}>
+                        <ListItem
+                            key={notif.id}
+                            divider={index < notificacoes.length - 1}
+                            secondaryAction={
+                                <IconButton edge="end" aria-label="delete" color="error" onClick={() => handleDelete(notif.id)}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            }
+                        >
                             <ListItemIcon>
                                 <NotificationsIcon color={notif.lida ? "disabled" : "primary"} />
                             </ListItemIcon>

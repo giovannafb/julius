@@ -271,8 +271,16 @@ export default function Home() {
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {planos.length === 0 ? (
                                 <Card sx={(theme) => ({ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', p: 0, borderRadius: 4, boxShadow: theme.palette.mode === 'dark' ? '0 0 50px rgba(0, 230, 118, 0.4)' : '0 4px 40px rgba(0, 230, 118, 0.25)' })}>
-                                <Box sx={{ p: 5, textAlign: 'center', bgcolor: 'background.paper', borderRadius: 4, border: '1px dashed', borderColor: 'divider' }}>
+                                <Box sx={{ flex: 1, p: 5, textAlign: 'center', bgcolor: 'background.paper', borderRadius: 4, border: '1px dashed', borderColor: 'divider', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
                                     <Typography variant="body1" color="textSecondary">Nenhum plano financeiro encontrado. Crie um para começar!</Typography>
+                                    <Button 
+                                        variant="contained" 
+                                        startIcon={<AddIcon />} 
+                                        onClick={() => handleOpenPlano()} 
+                                        sx={{ backgroundColor: '#aa3bff', '&:hover': { backgroundColor: '#8a2be2' }, borderRadius: 3, textTransform: 'none', fontWeight: 'bold' }}
+                                    >
+                                        NOVO PLANO
+                                    </Button>
                                 </Box>
                                 </Card>
                             ) : (

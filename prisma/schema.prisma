@@ -27,7 +27,7 @@ model PerfilEconomico {
   usuarioId     Int        @unique
   despesasFixas Despesa[]  @relation("DespesasFixasPerfil")
   historico     Historico?
-  usuario       Usuario    @relation(fields: [usuarioId], references: [id])
+  usuario       Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   receitasFixas Receita[]  @relation("ReceitasFixasPerfil")
 
   @@map("PerfilEconomico")
@@ -36,7 +36,7 @@ model PerfilEconomico {
 model Historico {
   id                Int             @id @default(autoincrement())
   perfilEconomicoId Int             @unique
-  perfilEconomico   PerfilEconomico @relation(fields: [perfilEconomicoId], references: [id])
+  perfilEconomico   PerfilEconomico @relation(fields: [perfilEconomicoId], references: [id], onDelete: Cascade)
   transacoes        Transacao[]
 
   @@map("Historico")
@@ -51,7 +51,7 @@ model PlanoFinanceiro {
   usuarioId                Int
   relatorioImpactos        AnaliseImpacto[]
   objetivos                ObjetivoFinanceiro[]
-  usuario                  Usuario              @relation(fields: [usuarioId], references: [id])
+  usuario                  Usuario              @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   relatoriosMensais        RelatorioMensal[]
 
   @@map("PlanoFinanceiro")
@@ -67,7 +67,7 @@ model ObjetivoFinanceiro {
   planoFinanceiroId     Int
   analisesOriginadas    AnaliseImpacto[]         @relation("ObjetivoOrigem")
   analisesComprometidas AnaliseImpactoObjetivo[]
-  planoFinanceiro       PlanoFinanceiro          @relation(fields: [planoFinanceiroId], references: [id])
+  planoFinanceiro       PlanoFinanceiro          @relation(fields: [planoFinanceiroId], references: [id], onDelete: Cascade)
 
   @@map("ObjetivoFinanceiro")
 }
@@ -81,7 +81,7 @@ model RelatorioMensal {
   saldoFinal          Float           @default(0)
   planoFinanceiroId   Int
   objetivosConcluidos Float           @default(0)
-  planoFinanceiro     PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id])
+  planoFinanceiro     PlanoFinanceiro @relation(fields: [planoFinanceiroId], references: [id], onDelete: Cascade)
 
   @@map("RelatorioMensal")
 }
@@ -93,9 +93,9 @@ model AnaliseImpacto {
   planoFinanceiroId      Int
   transacaoId            Int?
   objetivoOrigemId       Int?
-  objetivoOrigem         ObjetivoFinanceiro?      @relation("ObjetivoOrigem", fields: [objetivoOrigemId], references: [id])
-  planoFinanceiro        PlanoFinanceiro          @relation(fields: [planoFinanceiroId], references: [id])
-  transacao              Transacao?               @relation(fields: [transacaoId], references: [id])
+  objetivoOrigem         ObjetivoFinanceiro?      @relation("ObjetivoOrigem", fields: [objetivoOrigemId], references: [id], onDelete: Cascade)
+  planoFinanceiro        PlanoFinanceiro          @relation(fields: [planoFinanceiroId], references: [id], onDelete: Cascade)
+  transacao              Transacao?               @relation(fields: [transacaoId], references: [id], onDelete: Cascade)
   objetivosComprometidos AnaliseImpactoObjetivo[]
   notificacao            Notificacao?
 
@@ -109,7 +109,7 @@ model Notificacao {
   dataEnvio        DateTime
   lida             Boolean         @default(false)
   analiseImpactoId Int             @unique
-  analiseImpacto   AnaliseImpacto  @relation(fields: [analiseImpactoId], references: [id])
+  analiseImpacto   AnaliseImpacto  @relation(fields: [analiseImpactoId], references: [id], onDelete: Cascade)
 
   @@map("Notificacao")
 }
@@ -125,7 +125,7 @@ model Transacao {
   analisesImpacto AnaliseImpacto[]
   despesa         Despesa?         @relation("TransacaoDespesa")
   receita         Receita?         @relation("TransacaoReceita")
-  historico       Historico?       @relation(fields: [historicoId], references: [id])
+  historico       Historico?       @relation(fields: [historicoId], references: [id], onDelete: Cascade)
 
   @@map("Transacao")
 }

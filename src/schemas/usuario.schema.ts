@@ -22,6 +22,18 @@ export const usuarioBodySchema = {
   },
 };
 
+export const putUsuarioBodySchema = {
+  type: 'object',
+  required: ['nome', 'login', 'email', 'telefone'],
+  properties: {
+    nome: { type: 'string' },
+    login: { type: 'string' },
+    senha: { type: 'string' },
+    email: { type: 'string' },
+    telefone: { type: 'string' },
+  },
+};
+
 const params = {
   type: 'object',
   properties: { id: { type: 'string' } },
@@ -50,7 +62,7 @@ export const getUsuarioByIdSchema = {
 };
 
 export const putUsuarioSchema = {
-  schema: { tags: ['Usuarios'], params, security: [{ bearerAuth: [] }], body: usuarioBodySchema },
+  schema: { tags: ['Usuarios'], params, security: [{ bearerAuth: [] }], body: putUsuarioBodySchema },
 };
 
 export const deleteUsuarioSchema = {

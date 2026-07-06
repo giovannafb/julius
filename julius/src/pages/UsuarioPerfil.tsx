@@ -63,7 +63,7 @@ interface IPerfilEconomico {
 }
 
 export default function UsuarioPerfil() {
-    const { token, usuarioId, setToken } = useAuth();
+    const { token, usuarioId, setToken, logout } = useAuth();
     const navigate = useNavigate();
 
     const [user, setUser] = useState<IUsuario | null>(null);
@@ -74,6 +74,13 @@ export default function UsuarioPerfil() {
 
     const [selectedTransacao, setSelectedTransacao] = useState<ITransacao | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
+
+    const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [senhaAntiga, setSenhaAntiga] = useState('');
+    const [novaSenha, setNovaSenha] = useState('');
+    const [confirmarNovaSenha, setConfirmarNovaSenha] = useState('');
+    const [dialogErro, setDialogErro] = useState('');
 
     // Filtros do Histórico
     const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -140,6 +147,61 @@ export default function UsuarioPerfil() {
             fetchDados();
         } catch (e) {
             alert("Erro ao excluir transação");
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        try {
+            await axios.delete(`/usuarios/${user?.id}`);
+            logout();
+            navigate('/login');
+        } catch (err: any) {
+            setErro(err.response?.data?.message || 'Erro ao apagar a conta.');
+            setOpenDeleteDialog(false);
+        }
+    };
+
+    const handleAlterarSenha = async () => {
+        setDialogErro('');
+        if (novaSenha !== confirmarNovaSenha) {
+            setDialogErro('A nova senha e a confirmação não coincidem.');
+            return;
+        }
+        if (novaSenha.length < 6) {
+            setDialogErro('A nova senha deve ter no mínimo 6 caracteres.');
+            return;
+        }
+        
+        try {
+            if (!user?.login) {
+                setDialogErro('Login não encontrado.');
+                return;
+            }
+
+            try {
+                await axios.post('/auth/login', { login: user.login, senha: senhaAntiga });
+            } catch (err: any) {
+                setDialogErro('Senha antiga incorreta.');
+                return;
+            }
+
+            const payload = {
+                nome: user.nome,
+                login: user.login,
+                email: user.email,
+                telefone: user.telefone,
+                senha: novaSenha
+            };
+
+            await axios.put(`/usuarios/${user.id}`, payload);
+            
+            alert('Senha alterada com sucesso!');
+            setOpenPasswordDialog(false);
+            setSenhaAntiga('');
+            setNovaSenha('');
+            setConfirmarNovaSenha('');
+        } catch (err: any) {
+            setDialogErro('Erro ao alterar a senha.');
         }
     };
 
@@ -647,12 +709,70 @@ export default function UsuarioPerfil() {
                             error={!!errors.telefone}
                             helperText={errors.telefone?.message as string}
                         />
+                        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                            <Button variant="outlined" color="secondary" onClick={() => setOpenPasswordDialog(true)} fullWidth>Alterar senha</Button>
+                            <Button variant="outlined" color="error" onClick={() => setOpenDeleteDialog(true)} fullWidth>Apagar conta</Button>
+                        </Box>
                     </DialogContent>
                     <DialogActions sx={{ p: 3, pt: 0 }}>
                         <Button onClick={() => setEditDialogOpen(false)} color="inherit" sx={{ borderRadius: 2 }}>Cancelar</Button>
                         <Button type="submit" variant="contained" sx={{ borderRadius: 2, bgcolor: '#00e676', '&:hover': { bgcolor: '#00c853' } }}>Salvar</Button>
                     </DialogActions>
                 </form>
+            </Dialog>
+
+            <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+                <DialogTitle>Apagar Conta</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Tem certeza que deseja apagar sua conta? Esta ação é irreversível e todos os seus dados serão perdidos.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancelar</Button>
+                    <Button onClick={handleDeleteAccount} variant="contained" color="error">
+                        Apagar
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={openPasswordDialog} onClose={() => setOpenPasswordDialog(false)}>
+                <DialogTitle>Alterar Senha</DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2, minWidth: 300 }}>
+                    {dialogErro && (
+                        <Alert severity="error">{dialogErro}</Alert>
+                    )}
+                    <TextField
+                        variant="outlined"
+                        label="Senha (antiga)"
+                        type="password"
+                        value={senhaAntiga}
+                        onChange={(e) => setSenhaAntiga(e.target.value)}
+                        fullWidth
+                    />
+                    <TextField
+                        variant="outlined"
+                        label="Nova senha"
+                        type="password"
+                        value={novaSenha}
+                        onChange={(e) => setNovaSenha(e.target.value)}
+                        fullWidth
+                    />
+                    <TextField
+                        variant="outlined"
+                        label="Confirmação de Nova senha"
+                        type="password"
+                        value={confirmarNovaSenha}
+                        onChange={(e) => setConfirmarNovaSenha(e.target.value)}
+                        fullWidth
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenPasswordDialog(false)}>Cancelar</Button>
+                    <Button onClick={handleAlterarSenha} variant="contained" color="primary">
+                        Confirmar
+                    </Button>
+                </DialogActions>
             </Dialog>
         </Box>
     );
